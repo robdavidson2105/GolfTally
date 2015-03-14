@@ -1,0 +1,36 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "robdavidson2105@hotmail.com",
+    "longName": "GolfTally",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/target.png",
+                "name": "ICON_ACTIONBAR_TARGET",
+                "type": "png"
+            },
+            {
+                "file": "images/club.png",
+                "name": "ICON_ACTIONBAR_CLUB",
+                "type": "png"
+            },
+            {
+                "file": "images/flag.png",
+                "name": "ICON_ACTIONBAR_FLAG",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "GolfTally",
+    "uuid": "0d682740-538b-42b3-9cdb-10317b0275ad",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
