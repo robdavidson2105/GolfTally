@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "choose_hole.h"
 #include "current_hole_details.h"
+#include "scorecard.h"
   
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -53,6 +54,10 @@ static void holes_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_inde
   
 }
 
+static void holes_menu_select_long_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
+  show_scorecard();
+  
+}
 
 
 
@@ -62,6 +67,7 @@ void show_choose_hole(void) {
     .draw_row = holes_menu_draw_row,
     .get_num_rows = holes_menu_get_num_rows,
     .select_click = holes_menu_select_click,
+    .select_long_click = holes_menu_select_long_click,
   } );
   window_set_window_handlers(s_window, (WindowHandlers) {
     .unload = handle_window_unload,
