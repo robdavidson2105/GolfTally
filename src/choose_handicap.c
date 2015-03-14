@@ -13,8 +13,6 @@ static void select_handicap(NumberWindow *window, void *context) {
   set_handicap(number_window_get_value(s_num_window));
   //write it to persistent storage
   persist_write_int(HANDICAP_KEY, get_handicap());
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"Here");
-  
 
   //show_current_hole_details();
   window_stack_pop(true);
