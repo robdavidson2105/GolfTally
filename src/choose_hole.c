@@ -32,7 +32,7 @@ static uint16_t holes_menu_get_num_rows(struct MenuLayer* menu, uint16_t section
 }
 
 static void holes_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* callback_context) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"Draw rows");
+
   char title[] = "18 / Par 3 / SI 18";
   snprintf(title, sizeof(title), 
            "%d / Par %d / SI %d", 
@@ -49,7 +49,8 @@ static void holes_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuInde
 }
 
 static void holes_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
-  show_current_hole_details(cell_index->row);
+  show_current_hole_details(cell_index->row, callback_context);
+  
 }
 
 

@@ -3,6 +3,7 @@
 #include "current_hole_details.h"
   
 static uint8_t current_hole_index;
+static MenuLayer *callback_menu;
   
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -164,7 +165,18 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-
+  if (current_hole_index == 17) {
+    window_stack_pop(true);
+    hide_current_hole_details();
+    return;
+  }
+  static MenuIndex idx;
+  idx.row = current_hole_index + 1;
+  idx.section = 0;
+  menu_layer_set_selected_index(callback_menu, idx, MenuRowAlignCenter, false);
+  window_stack_pop(true);
+  hide_current_hole_details();
+  show_current_hole_details(current_hole_index + 1, callback_menu);
 }
 
 //Click Handler for single click on down button - adds a shot
@@ -188,8 +200,10 @@ static void click_config_provider(void *context) {
 }
 
 //Entry function for this window - called from choose_hole menu list
-void show_current_hole_details(uint8_t hole_index) {
+void show_current_hole_details(uint8_t hole_index, void *callback_context) {
   initialise_ui();
+  //Save a reference to the menu which called us here
+  callback_menu = callback_context;
   current_hole_index = hole_index;
   window_set_window_handlers(s_window, (WindowHandlers) {
     .unload = handle_window_unload,
