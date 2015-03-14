@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "current_hole_details.h"
   
+static uint8_t current_hole_index;
   
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -17,11 +18,11 @@ static TextLayer *s_distance_to_target_title;
 static TextLayer *s_strokes_title;
 static TextLayer *s_net_title;
 static TextLayer *s_points_title;
-static TextLayer *s_hole_si;
 static TextLayer *s_shots;
 static TextLayer *s_net;
 static TextLayer *s_points;
 static TextLayer *s_distance_to_target;
+static TextLayer *s_hole_subtitle;
 
 static void initialise_ui(void) {
   s_window = window_create();
@@ -82,15 +83,6 @@ static void initialise_ui(void) {
   text_layer_set_font(s_points_title, s_res_gothic_14);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_points_title);
   
-  // s_hole_si
-  s_hole_si = text_layer_create(GRect(1, 16, 120, 16));
-  text_layer_set_background_color(s_hole_si, GColorClear);
-  text_layer_set_text_color(s_hole_si, GColorWhite);
-  text_layer_set_text(s_hole_si, "SI 18 - Strokes rec'd 2");
-  text_layer_set_text_alignment(s_hole_si, GTextAlignmentCenter);
-  text_layer_set_font(s_hole_si, s_res_gothic_14);
-  layer_add_child(window_get_root_layer(s_window), (Layer *)s_hole_si);
-  
   // s_shots
   s_shots = text_layer_create(GRect(2, 113, 38, 36));
   text_layer_set_text(s_shots, "10");
@@ -120,6 +112,15 @@ static void initialise_ui(void) {
   text_layer_set_text_alignment(s_distance_to_target, GTextAlignmentCenter);
   text_layer_set_font(s_distance_to_target, s_res_roboto_condensed_21);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_distance_to_target);
+  
+  // s_hole_subtitle
+  s_hole_subtitle = text_layer_create(GRect(3, 15, 117, 17));
+  text_layer_set_background_color(s_hole_subtitle, GColorClear);
+  text_layer_set_text_color(s_hole_subtitle, GColorWhite);
+  text_layer_set_text(s_hole_subtitle, "SI 18 - 2 shots rec'd");
+  text_layer_set_text_alignment(s_hole_subtitle, GTextAlignmentCenter);
+  text_layer_set_font(s_hole_subtitle, s_res_gothic_14);
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_hole_subtitle);
 }
 
 static void destroy_ui(void) {
@@ -130,11 +131,11 @@ static void destroy_ui(void) {
   text_layer_destroy(s_strokes_title);
   text_layer_destroy(s_net_title);
   text_layer_destroy(s_points_title);
-  text_layer_destroy(s_hole_si);
   text_layer_destroy(s_shots);
   text_layer_destroy(s_net);
   text_layer_destroy(s_points);
   text_layer_destroy(s_distance_to_target);
+  text_layer_destroy(s_hole_subtitle);
   gbitmap_destroy(s_res_icon_actionbar_target);
   gbitmap_destroy(s_res_icon_actionbar_flag);
   gbitmap_destroy(s_res_icon_actionbar_club);
@@ -145,25 +146,66 @@ static void handle_window_unload(Window* window) {
   destroy_ui();
 }
 
-void display_shots(uint8_t hole_index) {
+//Function to update the display with the latest score
+void display_shots(void) {
   static char shots[] = "10";
-  snprintf(shots, sizeof(shots), "%d", get_my_strokes(hole_index));
+  static char net[] = "10";
+  static char points[] = "10";
+  snprintf(shots, sizeof(shots), "%d", get_my_strokes(current_hole_index));
   text_layer_set_text(s_shots, shots);
+  snprintf(net, sizeof(net), "%d", get_my_net(current_hole_index));
+  text_layer_set_text(s_net, net);
+  snprintf(points, sizeof(points), "%d", get_my_points(current_hole_index));
+  text_layer_set_text(s_points, points);
 }
 
+static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+  
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+
+}
+
+//Click Handler for single click on down button - adds a shot
+static void add_shot(ClickRecognizerRef recognizer, void *context) {
+  set_my_strokes(current_hole_index, get_my_strokes(current_hole_index)+1);
+  display_shots();
+}
+
+//Click Handler for long click on down button - subtracts a shot
+static void subtract_shot(ClickRecognizerRef recognizer, void *context) {
+  set_my_strokes(current_hole_index, get_my_strokes(current_hole_index)-1);
+  display_shots();
+}
+
+//Set up ClickHandlers
+static void click_config_provider(void *context) {
+  window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, add_shot);
+  window_long_click_subscribe(BUTTON_ID_DOWN, 0, NULL, subtract_shot);
+}
+
+//Entry function for this window - called from choose_hole menu list
 void show_current_hole_details(uint8_t hole_index) {
   initialise_ui();
+  current_hole_index = hole_index;
   window_set_window_handlers(s_window, (WindowHandlers) {
     .unload = handle_window_unload,
   });
+  window_set_click_config_provider(s_window, click_config_provider);
+  
+  //Setup the initial values for the hole
   static char hole_number[] = "Hole 18 - Par 3";
   snprintf(hole_number, sizeof(hole_number), "Hole %d - Par %d", hole_index+1, get_par(hole_index));
-  display_shots(hole_index);
-  
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"Show hole number");
-  APP_LOG(APP_LOG_LEVEL_DEBUG,hole_number);
   text_layer_set_text(s_hole_title, hole_number);
   
+  static char hole_subtitle[] = "SI 18 - 2 shots rec'd";
+  snprintf(hole_subtitle, sizeof(hole_subtitle), "SI %d - %d shots rec'd", get_si(hole_index), get_my_shots_received(hole_index));
+  text_layer_set_text(s_hole_subtitle, hole_subtitle);
+  
+  display_shots();
   window_stack_push(s_window, true);
 }
 
