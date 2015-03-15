@@ -1,7 +1,10 @@
 {
-    "appKeys": {},
+    "appKeys": {
+        "COURSE_NAME": 0,
+        "HOLES": 1
+    },
     "capabilities": [
-        ""
+        "location"
     ],
     "companyName": "robdavidson2105@hotmail.com",
     "longName": "GolfTally",
@@ -27,6 +30,10 @@
     },
     "sdkVersion": "3",
     "shortName": "GolfTally",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
     "uuid": "0d682740-538b-42b3-9cdb-10317b0275ad",
     "versionCode": 1,
     "versionLabel": "1.0",

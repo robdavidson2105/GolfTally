@@ -66,7 +66,6 @@ void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si) {
   hole[hole_index].my_net = 0;
   hole[hole_index].my_points = 0;
   hole[hole_index].my_shots_received = calculate_shots(si, get_handicap());
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Hole %d - shots %d", hole_index, hole[hole_index].my_shots_received);
 };
 
 uint8_t calculate_shots(uint8_t si, uint8_t handicap) {

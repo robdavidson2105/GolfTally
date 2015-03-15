@@ -33,47 +33,44 @@ static void handle_window_unload(Window* window) {
   destroy_ui();
 }
 
+// Number of rows in the main menu
 static uint16_t main_menu_get_num_rows(struct MenuLayer* menu, uint16_t section_index, void* callback_context) {
   return 3;
 }
 
+// Draw the menu rows
 static void main_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* callback_context) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"Draw rows");
   
   switch (cell_index->row) {
-    case MENU_ROW_SET_HANDICAP:
-      APP_LOG(APP_LOG_LEVEL_DEBUG,"Draw hcap row");
-      char subtitle[] = "My handicap: 18";
+    case MENU_ROW_SET_HANDICAP: ;
+      static char subtitle[] = "My handicap: 18";
       snprintf(subtitle, sizeof(subtitle), "My handicap: %d", get_handicap());
       menu_cell_basic_draw(ctx, cell_layer, "Set Handicap", subtitle, NULL);
       break;
     case MENU_ROW_CHOOSE_COURSE:
-      APP_LOG(APP_LOG_LEVEL_DEBUG,"Draw course row");
       menu_cell_basic_draw(ctx, cell_layer, "Choose Course", "None selected", NULL);
       break;
     case MENU_ROW_START_GAME:
-      menu_cell_basic_draw(ctx, cell_layer, "Lets go", NULL, NULL);
+      menu_cell_basic_draw(ctx, cell_layer, "Start round", NULL, NULL);
       break;
   }
 }
 
+// Click handler for the menu
 static void main_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
   switch (cell_index->row) {
     case MENU_ROW_SET_HANDICAP:
-      APP_LOG(APP_LOG_LEVEL_DEBUG,"Set hcap");
       show_choose_handicap();
       break;
     case MENU_ROW_CHOOSE_COURSE:
-      APP_LOG(APP_LOG_LEVEL_DEBUG,"Choose Course");
       break;
     case MENU_ROW_START_GAME:
-      APP_LOG(APP_LOG_LEVEL_DEBUG,"Start Game");
       show_choose_hole();
       break;
   }
 }
 
-
+// Main entry function to create the menu
 void show_main_menu(void) {
   initialise_ui();
   menu_layer_set_callbacks(s_main_menu, s_main_menu, (MenuLayerCallbacks){

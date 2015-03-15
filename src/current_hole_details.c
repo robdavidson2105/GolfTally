@@ -161,21 +161,31 @@ void display_shots(void) {
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    Tuplet value = TupletInteger(5, 5);
+    dict_write_tuplet(iter, &value);
+ 
+    app_message_outbox_send();
 }
 
+//If the select button is pressed then move onto the next hole....
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+  //...but first check we're not already on the last hole
   if (current_hole_index == 17) {
     window_stack_pop(true);
     hide_current_hole_details();
     return;
   }
+  //We need to make sure the selected index in the previous menulayer is
+  //advanced - we've been storing the parent menu in callback_menu
   static MenuIndex idx;
   idx.row = current_hole_index + 1;
   idx.section = 0;
   menu_layer_set_selected_index(callback_menu, idx, MenuRowAlignCenter, false);
   window_stack_pop(true);
   hide_current_hole_details();
+  //After closing the current hole - show the next hole details
   show_current_hole_details(current_hole_index + 1, callback_menu);
 }
 
