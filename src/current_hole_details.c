@@ -165,7 +165,6 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     app_message_outbox_begin(&iter);
     Tuplet value = TupletInteger(5, 5);
     dict_write_tuplet(iter, &value);
- 
     app_message_outbox_send();
 }
 

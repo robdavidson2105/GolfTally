@@ -1,6 +1,8 @@
 #include <pebble.h>
 #include "globals.h"
 
+#define PI 3.14159265  
+  
 static uint8_t handicap;
 struct holes {
   uint8_t par;
@@ -79,3 +81,57 @@ uint8_t calculate_shots(uint8_t si, uint8_t handicap) {
   }
   return shots;
 }
+
+double cosine(double x) {
+  double cos = 0.0;
+  x += 1.57079632;
+  if (x >  3.14159265)
+      x -= 6.28318531;
+    if (x < 0) { 
+    cos = 1.27323954 * x + 0.405284735 * x * x;
+    
+    if (cos < 0)
+        cos = .225 * (cos *-cos - cos) + cos;
+    else
+        cos = .225 * (cos * cos - cos) + cos;
+    }
+    else
+    {
+    cos = 1.27323954 * x - 0.405284735 * x * x;
+
+    if (cos < 0)
+        cos = .225 * (cos *-cos - cos) + cos;
+    else
+        cos = .225 * (cos * cos - cos) + cos;
+    }
+  return cos;
+}
+
+#define SQRT_MAGIC_F 0x5f3759df 
+float my_sqrt(const float x)
+{
+  const float xhalf = 0.5f*x;
+ 
+  union // get bits for floating value
+  {
+    float x;
+    int i;
+  } u;
+  u.x = x;
+  u.i = SQRT_MAGIC_F - (u.i >> 1);  // gives initial guess y0
+  return x*u.x*(1.5f - xhalf*u.x*u.x);// Newton step, repeating increases accuracy 
+}
+
+int calculate_distance(double lat1, double long1, double lat2, double long2) {
+  lat1 = PI * lat1 / 180.0;
+  lat2 = PI * lat2 / 180.0;
+  long1 = PI * long1 / 180.0;
+  long2 = PI * long2 / 180.0;
+  double x = long2 - long1;
+  x = x * cosine((lat1 + lat2)/2.0);
+  double y = lat2 - lat1;
+  double distance = x * x + y * y ;
+  distance = 6967325 * my_sqrt(distance);
+  return (int)(distance);
+}
+

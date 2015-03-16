@@ -13,3 +13,6 @@ void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si);
 
 uint8_t calculate_shots(uint8_t si, uint8_t handicap);
 
+double cosine(double x);
+int calculate_distance(double lat1, double long1, double lat2, double long2);
+

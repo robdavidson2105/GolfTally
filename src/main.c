@@ -46,6 +46,12 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 
 int main(void) {
   init();
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, 
+          "distance: %d", 
+          calculate_distance(53.518376, -2.379803, 53.518832, -2.381675)
+         );
+         
   app_message_register_inbox_received(in_received_handler);
   app_message_open(64, 64);
   app_event_loop();
