@@ -1,4 +1,4 @@
-#include <pebble.h>
+/*#include <pebble.h>
 #include "scorecard.h"
 #include "globals.h"
 
@@ -1282,5 +1282,5 @@ void display_scores(void) {
 }
 
 
-
+*/
 
