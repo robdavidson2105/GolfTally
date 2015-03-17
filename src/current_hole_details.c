@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "globals.h"
 #include "current_hole_details.h"
+
   
 static uint8_t current_hole_index;
 static MenuLayer *callback_menu;
@@ -161,11 +162,28 @@ void display_shots(void) {
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-    DictionaryIterator *iter;
-    app_message_outbox_begin(&iter);
-    Tuplet value = TupletInteger(5, 5);
-    dict_write_tuplet(iter, &value);
-    app_message_outbox_send();
+  // Send a request to the phone to update the current location
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  Tuplet value = TupletInteger(KEY_COMMAND, COMMAND_GET_LOCATION);
+  dict_write_tuplet(iter, &value);
+  app_message_outbox_send();
+  // The message received handler is in main.c - it'll call the following update function
+}
+
+void update_distance(int latitude, int longitude) {
+  //We receive lat and lon as integers - values must be divided by 1000000
+  double lat = (double)latitude / 1000000;
+  double lon = (double)longitude / 1000000;
+  int distance = calculate_distance(lat, lon, 53.518832, -2.381675);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat received from phone: %d", latitude);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Long received from phone: %d", longitude);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "New distance called: %d", distance);
+  static char yardage[] = "??? Yds";
+  if (distance < 1000) {
+    snprintf(yardage, sizeof(yardage),"%d Yds", distance);
+  }
+  text_layer_set_text(s_distance_to_target, yardage);
 }
 
 //If the select button is pressed then move onto the next hole....

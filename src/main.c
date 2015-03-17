@@ -1,57 +1,37 @@
 #include <pebble.h>
 #include "globals.h"
 #include "main_menu.h"
-#include "choose_handicap.h"  
+#include "choose_handicap.h" 
+#include "current_hole_details.h"
 
 #define HANDICAP_KEY 1   
   
 static void init(void);
 static void deinit(void);
-
-void process_tuple(Tuple *t)
-{
-  //Get key
-  int key = t->key;
- 
-  //Get integer value, if present
-  int value = t->value->int32;
- 
-  //Get string value, if present
-  char string_value[32];
-  strcpy(string_value, t->value->cstring);
- 
-  //Log
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", key);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "%d, %d, %d", string_value[0], string_value[1], string_value[2]);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", value);
-  
-}
   
 
 static void in_received_handler(DictionaryIterator *iter, void *context) 
 {
-    (void) context;
-     
-    //Get data
-    Tuple *t = dict_read_first(iter);
-    while(t != NULL)
-    {
-        process_tuple(t);
-         
-        //Get next
-        t = dict_read_next(iter);
-    }
+  Tuple* command = dict_find(iter, KEY_COMMAND);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Msg received from phone: %d", (int)command->value->int32);
+  switch(command->value->int32) {
+    case COMMAND_RECEIVE_LOCATION:;
+      Tuple* longitude = dict_find(iter, KEY_LONG);
+      Tuple* latitude = dict_find(iter, KEY_LAT);
+      update_distance((int)latitude->value->int32, (int)longitude->value->int32);      
+      break;
+  }
 }
 
 
 int main(void) {
   init();
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, 
+  /*APP_LOG(APP_LOG_LEVEL_DEBUG, 
           "distance: %d", 
           calculate_distance(53.518376, -2.379803, 53.518832, -2.381675)
          );
-         
+  */       
   app_message_register_inbox_received(in_received_handler);
   app_message_open(64, 64);
   app_event_loop();

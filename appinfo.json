@@ -1,7 +1,11 @@
 {
     "appKeys": {
-        "COURSE_NAME": 0,
-        "HOLES": 1
+        "COMMAND": 0,
+        "HOLE_INDEX": 1,
+        "LAT": 4,
+        "LONG": 5,
+        "PAR": 3,
+        "SI": 2
     },
     "capabilities": [
         "location"

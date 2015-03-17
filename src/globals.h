@@ -1,4 +1,36 @@
 #include <pebble.h>
+#define KEY_COMMAND 0
+#define KEY_HOLE_INDEX 1
+#define KEY_SI 2
+#define KEY_PAR 3
+#define KEY_LAT 4
+#define KEY_LONG 5
+
+#define COMMAND_LIST_COURSES 0
+#define COMMAND_SELECT_COURSE 1
+#define COMMAND_GET_LOCATION 2
+#define COMMAND_RECEIVE_COURSES 3
+#define COMMAND_RECEIVE_LOCATION  4 
+  
+
+/*  
+enum {
+  KEY_COMMAND       = 0,
+  KEY_HOLE_INDEX    = 1,
+  KEY_SI            = 2,
+  KEY_PAR           = 3,
+  KEY_LAT           = 4,
+  KEY_LONG          = 5
+};
+  
+enum {
+  COMMAND_LIST_COURSES   = 0,
+  COMMAND_SELECT_COURSE  = 1,
+  COMMAND_GET_LOCATION   = 2,
+  COMMAND_RECEIVE_COURSES = 3,
+  COMMAND_RECEIVE_LOCATION = 4
+};  
+*/ 
 void set_handicap(uint8_t new_handicap);
 uint8_t get_handicap(void);
 
