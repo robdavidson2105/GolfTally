@@ -50,16 +50,12 @@ static void holes_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuInde
 }
 
 static void holes_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
-  show_current_hole_details(cell_index->row, callback_context);
-  
+  show_current_hole_details(cell_index->row, callback_context);  
 }
 
 static void holes_menu_select_long_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
   show_scorecard();
-  
 }
-
-
 
 void show_choose_hole(void) {
   initialise_ui();

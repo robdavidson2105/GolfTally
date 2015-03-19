@@ -31,7 +31,7 @@ var appMessageQueue = {
                 console.log('Failed sending AppMessage: ' + JSON.stringify(this.nextMessage()));
                 ack();
             }
-            console.log('Sending AppMessage: ' + JSON.stringify(this.nextMessage()));
+            //console.log('Sending AppMessage: ' + JSON.stringify(this.nextMessage()));
             Pebble.sendAppMessage(this.nextMessage(), ack, nack);
         }
     }
@@ -42,21 +42,34 @@ var commands = {
   COMMAND_SELECT_COURSE : 1,
   COMMAND_GET_LOCATION : 2,
   COMMAND_RECEIVE_COURSES : 3,
-  COMMAND_RECEIVE_LOCATION : 4
+  COMMAND_RECEIVE_LOCATION : 4,
+  COMMAND_RECEIVE_COURSE_DETAILS : 5,
 };
 
 function cleanCoordinate(coord) {
   return (coord * 1000000)|0;
 }
 
+function sendCourses() {
+  appMessageQueue.clear();
+            appMessageQueue.add({
+              COMMAND: commands.COMMAND_RECEIVE_COURSES,
+              COURSE_ID: 1,
+              COURSE_NAME: "Ellesmere"
+            });
+            appMessageQueue.add({
+              COMMAND: commands.COMMAND_RECEIVE_COURSES,
+              COURSE_ID: 2,
+              COURSE_NAME: "Worsley"
+            });
+            appMessageQueue.send();
+}
 
 var locationOptions = {
 enableHighAccuracy: true,
 maximumAge: 10000,
 timeout: 40000
 };
-
-var current_index = 0;
 
 function locationSuccess(pos) {
   //test coords: 53.518376, -2.379803
@@ -74,41 +87,58 @@ function locationError(err) {
 console.log('location error (' + err.code + '): ' + err.message);
 }
 
-var sendNextTuple = function(e) {
-  if (current_index === 0) {
-    var dict = {"COURSE_NAME" : "Ellesemere", "HOLES" : [3,5,3,4,4,5]};
-    current_index++;
-    Pebble.sendAppMessage(dict , 
-                         function(e){
-                           current_index++;
-                           sendNextTuple();
-                         });
-    return;
+function sendCourseDetails() {
+  var holes =[];
+  holes.push({
+    COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
+    HOLE_INDEX: 0,
+    SI: 18,
+    PAR: 3,
+    LAT: 5351837600,
+    LONG: -237980300
+  });
+  holes.push({
+    COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
+    HOLE_INDEX: 1,
+    SI: 17,
+    PAR: 4,
+    LAT: 5351837600,
+    LONG: -237980300
+  });
+
+  console.log(JSON.stringify(holes));
+  appMessageQueue.clear();
+  var len = holes.length;
+  for (var i = 0; i < len; i++) {
+    appMessageQueue.add({
+    COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
+    HOLE_INDEX: holes[i].HOLE_INDEX,
+    SI: holes[i].SI,
+    PAR: holes[i].PAR,
+    LAT: cleanCoordinate(53.518376),
+    LONG: cleanCoordinate(-2.379803)
+  });
+    console.log();
   }
-  var next = {"COURSE_NAME" : "Marriott", "HOLES" : [2,9,4,3,2,4]};
-  Pebble.sendAppMessage(next);
-};
+  console.log("Sending course details... ");
+  appMessageQueue.send();
+}
 
-
-Pebble.addEventListener("ready", 
-function(e) { 
-//App is ready to receive JS messages
-console.log("Ready");
-} 
-); 
 Pebble.addEventListener("appmessage", 
 function(e) { 
-//Watch wants new data!
   console.log("Received " + e.payload.COMMAND );
   if (e.payload.COMMAND !== null) {
- 
         switch (e.payload.COMMAND) {
         case commands.COMMAND_LIST_COURSES:
             console.log("List Courses");
+            sendCourses();
             break;
+            
         case commands.COMMAND_SELECT_COURSE:         
-            console.log("Select Course");
+            console.log("Select Course " + e.payload.COURSE_ID);
+            sendCourseDetails();
             break;
+            
         case commands.COMMAND_GET_LOCATION:         
             console.log("Get Location");
             navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
@@ -118,8 +148,6 @@ function(e) {
     } else {
         appMessageQueue.clear();
     }
-  
-  //sendNextTuple();
   
 } 
 ); 

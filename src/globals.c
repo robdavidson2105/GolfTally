@@ -4,17 +4,72 @@
 #define PI 3.14159265  
   
 static uint8_t handicap;
+uint8_t count_of_courses = 0;
+int8_t selected_course_index = -1;
+static bool round_in_progress = false;
+
 struct holes {
   uint8_t par;
   uint8_t si;
+  double latitude;
+  double longitude;
   uint8_t my_strokes;
   uint8_t my_shots_received;
   int8_t my_net;
   int8_t my_points;
 } hole[18];
-  
+
+struct courses {
+  uint8_t course_id;
+  char course_name[20];
+} course[20];
+
+void add_course(uint8_t course_id, char* course_name) {
+  course[count_of_courses].course_id = course_id;
+  snprintf(course[count_of_courses].course_name, 20, "%s", course_name);
+  count_of_courses++;
+}
+
+char* get_course(uint8_t course_index) {
+  return course[course_index].course_name;
+}
+
+//TODO - reset and clear array
+void reset_course_count(void) {
+  count_of_courses = 0;
+}
+
+uint8_t get_count_of_courses(void) {
+  return count_of_courses;
+}
+int8_t get_selected_course_index() {
+  return selected_course_index;
+}
+
+void set_selected_course_index(int8_t course_index) {
+  selected_course_index = course_index;
+}
+
+bool is_round_in_progress(void) {
+  return round_in_progress;
+}
+void set_round_in_progress(void) {
+  round_in_progress = true;
+}
+void clear_round_in_progress(void) {
+  round_in_progress = false;
+}
+
 void set_handicap(uint8_t new_handicap) {
   handicap = new_handicap;
+  if (selected_course_index != -1) {
+    for (uint8_t i=0; i <18; i++) {
+      //if the handicap changed and we've started a round
+      //then need to update the score - so we call set strokes just in case...
+      hole[i].my_shots_received = calculate_shots(hole[i].si, handicap);
+      set_my_strokes(i, get_my_strokes(i));
+    }
+  }
 }
 
 uint8_t get_handicap(void) {
@@ -61,9 +116,11 @@ void set_my_strokes(uint8_t hole_index, int8_t new_strokes) {
   }
 };
 
-void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si) {
+void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si, double latitude, double longitude) {
   hole[hole_index].par = par;
   hole[hole_index].si = si;
+  hole[hole_index].latitude = latitude;
+  hole[hole_index].longitude = longitude;
   hole[hole_index].my_strokes = 0;
   hole[hole_index].my_net = 0;
   hole[hole_index].my_points = 0;

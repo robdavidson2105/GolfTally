@@ -1,6 +1,8 @@
 {
     "appKeys": {
         "COMMAND": 0,
+        "COURSE_ID": 6,
+        "COURSE_NAME": 7,
         "HOLE_INDEX": 1,
         "LAT": 4,
         "LONG": 5,
