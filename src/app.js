@@ -87,71 +87,89 @@ function locationError(err) {
 console.log('location error (' + err.code + '): ' + err.message);
 }
 
-function sendCourseDetails() {
+function sendCourseDetails(data) {
+  console.log('Received course details from Parse...');
   var holes =[];
-  holes.push({
-    COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
-    HOLE_INDEX: 0,
-    SI: 18,
-    PAR: 3,
-    LAT: 5351837600,
-    LONG: -237980300
-  });
-  holes.push({
-    COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
-    HOLE_INDEX: 1,
-    SI: 17,
-    PAR: 4,
-    LAT: 5351837600,
-    LONG: -237980300
-  });
-
-  //console.log(JSON.stringify(holes));
-  appMessageQueue.clear();
-  var len = holes.length;
-  for (var i = 0; i < len; i++) {
-    appMessageQueue.add({
+  var response = JSON.parse(data);
+  var hole_details = response.Holes;
+  for (var i = 0; i < 18; i++) {
+    holes.push({
       COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
-      HOLE_INDEX: holes[i].HOLE_INDEX,
-      SI: holes[i].SI,
-      PAR: holes[i].PAR,
-      LAT: cleanCoordinate(53.518376),
-      LONG: cleanCoordinate(-2.379803)
+      HOLE_INDEX: parseInt(hole_details[i].HoleIndex),
+      SI: parseInt(hole_details[i].StrokeIndex),
+      PAR: parseInt(hole_details[i].Par),
+      LAT: cleanCoordinate(parseFloat(hole_details[i].Lat)),
+      LONG: cleanCoordinate(parseFloat(hole_details[i].Long))
     });
   }
-  console.log("Sending course details... ");
+  console.log(JSON.stringify(holes));
+  
+  appMessageQueue.clear();
+  for (var n = 0; n < 18; n++) {
+    appMessageQueue.add({
+      COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
+      HOLE_INDEX: holes[n].HOLE_INDEX,
+      SI: holes[n].SI,
+      PAR: holes[n].PAR,
+      LAT: holes[n].LAT,
+      LONG: holes[n].LONG
+    });
+  }
+  console.log('Sending course details to Pebble...');
   appMessageQueue.send();
 }
 
 function sendCourseList(data) {
+  console.log('Response received...');
   console.log(JSON.stringify(data));
+  var response = JSON.parse(data);
+  var courses = response.results;
+  console.log(JSON.stringify(response));
+  console.log(courses[0].Name);
+  console.log("Number of courses: " + courses.length);
+  appMessageQueue.clear();
+  for (var i = 0; i < courses.length; i++) {
+    appMessageQueue.add({
+              COMMAND: commands.COMMAND_RECEIVE_COURSES,
+              COURSE_ID: courses[i].objectId,
+              COURSE_NAME: courses[i].Name
+            });
+  }
+  appMessageQueue.send();
+  
+}
+
+function getCourseDetails(courseID) {
+  console.log('Getting course details...');
+  var xhr = new XMLHttpRequest();
+  var url = 'https://api.parse.com/1/classes/Course/' + courseID;
+  xhr.open('GET', url, true);
+  xhr.responseType = 'json';
+  xhr.setRequestHeader('X-Parse-Application-Id','cfjEGfMBX9PMvwb1ien9G5J6ttN6C3zDozBoL0Kp');
+  xhr.setRequestHeader('X-Parse-REST-API-Key','a7EWINL4OUZ4lEuA4t7X9iCwQ1wPl0fRliCGnQmU');
+  xhr.onload = function () {
+    console.log(xhr.responseText);
+    sendCourseDetails(xhr.responseText);
+  };
+
+  xhr.send();
 }
 
 function getCourseList() {
+  console.log('Getting course list...');
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'https://api.parse.com/1/classes/Courses', true);
-  xhr.reponseType = 'json';
-  xhr.onload = sendCourseList(xhr.responseText);
-    //function() {
-    //console.log(JSON.stringify(xhr.responseText));
-  //};
-  xhr.setRequestHeader('X-Parse-Application-Id','StLdNROxObnXnsMmMQy04IGTESb3knvycrHsuiXH');
-  xhr.setRequestHeader('X-Parse-REST-API-Key','ncucKuYWWez3FfbF1UPEehLqgnFkhyQZYzLfuCPv');
+  var url = 'https://api.parse.com/1/classes/Course';
+  //var url = 'https://cfjEGfMBX9PMvwb1ien9G5J6ttN6C3zDozBoL0Kp:javascript-key=E4gtLnecX313jK3D8iSbreyDKUyt09aKTaw8A6Ki@api.parse.com/1/classes/Course';
+  xhr.open('GET', url, true);
+  xhr.responseType = 'json';
+  xhr.setRequestHeader('X-Parse-Application-Id','cfjEGfMBX9PMvwb1ien9G5J6ttN6C3zDozBoL0Kp');
+  xhr.setRequestHeader('X-Parse-REST-API-Key','a7EWINL4OUZ4lEuA4t7X9iCwQ1wPl0fRliCGnQmU');
+  xhr.onload = function () {
+    console.log(xhr.responseText);
+    sendCourseList(xhr.responseText);
+  };
+
   xhr.send();
-/*
-ajax(
-  {
-    url:'https://api.parse.com/1/classes/Courses',
-    type:'json',
-    method:'get',
-    headers:{'X-Parse-Application-Id':'StLdNROxObnXnsMmMQy04IGTESb3knvycrHsuiXH', 
-             'X-Parse-REST-API-Key':'ncucKuYWWez3FfbF1UPEehLqgnFkhyQZYzLfuCPv'}
-  },
-  sendCourseList(data),
-  function(error) {
-    console.log("Download failed: " + error);
-  }
-);*/
 }
 Pebble.addEventListener("appmessage", 
 function(e) { 
@@ -164,8 +182,8 @@ function(e) {
             break;
             
         case commands.COMMAND_SELECT_COURSE:         
-            //console.log("Select Course " + e.payload.COURSE_ID);
-            sendCourseDetails();
+            console.log("Select Course " + e.payload.COURSE_ID);
+            getCourseDetails(e.payload.COURSE_ID);
             break;
             
         case commands.COMMAND_GET_LOCATION:         

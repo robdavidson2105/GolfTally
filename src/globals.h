@@ -20,8 +20,9 @@
 void set_handicap(uint8_t new_handicap);
 uint8_t get_handicap(void);
 uint8_t get_count_of_courses(void);
-void add_course(uint8_t course_id, char* course_name);
+void add_course(char* course_id, char* course_name);
 char* get_course(uint8_t course_index);
+char* get_course_id(uint8_t course_index);
 int8_t get_selected_course_index();
 void set_selected_course_index(int8_t course_index);
 void reset_course_count(void);

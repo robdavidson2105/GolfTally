@@ -44,7 +44,8 @@ static void course_list_select_click(struct MenuLayer* menu, MenuIndex* cell_ind
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
   Tuplet command = TupletInteger(KEY_COMMAND, COMMAND_SELECT_COURSE);
-  Tuplet value = TupletInteger(KEY_COURSE_ID, cell_index->row);
+  Tuplet value = TupletCString(KEY_COURSE_ID, get_course_id(cell_index->row));
+  // Tuplet value = TupletInteger(KEY_COURSE_ID, cell_index->row);
   dict_write_tuplet(iter, &command);
   dict_write_tuplet(iter, &value);
   app_message_outbox_send();

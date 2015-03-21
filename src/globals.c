@@ -20,18 +20,23 @@ struct holes {
 } hole[18];
 
 struct courses {
-  uint8_t course_id;
+  char course_id[11];
   char course_name[20];
 } course[20];
 
-void add_course(uint8_t course_id, char* course_name) {
-  course[count_of_courses].course_id = course_id;
+void add_course(char* course_id, char* course_name) {
+  //course[count_of_courses].course_id = course_id;
+  snprintf(course[count_of_courses].course_id, 11, "%s", course_id);
   snprintf(course[count_of_courses].course_name, 20, "%s", course_name);
   count_of_courses++;
 }
 
 char* get_course(uint8_t course_index) {
   return course[course_index].course_name;
+}
+
+char* get_course_id(uint8_t course_index) {
+  return course[course_index].course_id;
 }
 
 //TODO - reset and clear array

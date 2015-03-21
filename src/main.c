@@ -28,7 +28,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
       //The dictionary should contain a single course id and course name
       Tuple* course_id = dict_find(iter, KEY_COURSE_ID);
       Tuple* course_name = dict_find(iter, KEY_COURSE_NAME);
-      add_course((uint8_t)course_id->value->int32, course_name->value->cstring);
+      add_course(course_id->value->cstring, course_name->value->cstring);
       menu_layer_reload_data(s_course_list);
       break;
     
