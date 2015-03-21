@@ -106,41 +106,70 @@ function sendCourseDetails() {
     LONG: -237980300
   });
 
-  console.log(JSON.stringify(holes));
+  //console.log(JSON.stringify(holes));
   appMessageQueue.clear();
   var len = holes.length;
   for (var i = 0; i < len; i++) {
     appMessageQueue.add({
-    COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
-    HOLE_INDEX: holes[i].HOLE_INDEX,
-    SI: holes[i].SI,
-    PAR: holes[i].PAR,
-    LAT: cleanCoordinate(53.518376),
-    LONG: cleanCoordinate(-2.379803)
-  });
-    console.log();
+      COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
+      HOLE_INDEX: holes[i].HOLE_INDEX,
+      SI: holes[i].SI,
+      PAR: holes[i].PAR,
+      LAT: cleanCoordinate(53.518376),
+      LONG: cleanCoordinate(-2.379803)
+    });
   }
   console.log("Sending course details... ");
   appMessageQueue.send();
 }
 
+function sendCourseList(data) {
+  console.log(JSON.stringify(data));
+}
+
+function getCourseList() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://api.parse.com/1/classes/Courses', true);
+  xhr.reponseType = 'json';
+  xhr.onload = sendCourseList(xhr.responseText);
+    //function() {
+    //console.log(JSON.stringify(xhr.responseText));
+  //};
+  xhr.setRequestHeader('X-Parse-Application-Id','StLdNROxObnXnsMmMQy04IGTESb3knvycrHsuiXH');
+  xhr.setRequestHeader('X-Parse-REST-API-Key','ncucKuYWWez3FfbF1UPEehLqgnFkhyQZYzLfuCPv');
+  xhr.send();
+/*
+ajax(
+  {
+    url:'https://api.parse.com/1/classes/Courses',
+    type:'json',
+    method:'get',
+    headers:{'X-Parse-Application-Id':'StLdNROxObnXnsMmMQy04IGTESb3knvycrHsuiXH', 
+             'X-Parse-REST-API-Key':'ncucKuYWWez3FfbF1UPEehLqgnFkhyQZYzLfuCPv'}
+  },
+  sendCourseList(data),
+  function(error) {
+    console.log("Download failed: " + error);
+  }
+);*/
+}
 Pebble.addEventListener("appmessage", 
 function(e) { 
   console.log("Received " + e.payload.COMMAND );
   if (e.payload.COMMAND !== null) {
         switch (e.payload.COMMAND) {
         case commands.COMMAND_LIST_COURSES:
-            console.log("List Courses");
-            sendCourses();
+            //console.log("List Courses");
+            getCourseList();
             break;
             
         case commands.COMMAND_SELECT_COURSE:         
-            console.log("Select Course " + e.payload.COURSE_ID);
+            //console.log("Select Course " + e.payload.COURSE_ID);
             sendCourseDetails();
             break;
             
         case commands.COMMAND_GET_LOCATION:         
-            console.log("Get Location");
+            //console.log("Get Location");
             navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
             break;
         }
@@ -150,4 +179,4 @@ function(e) {
     }
   
 } 
-); 
+);

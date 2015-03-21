@@ -14,6 +14,8 @@
 #define COMMAND_RECEIVE_COURSES 3
 #define COMMAND_RECEIVE_LOCATION 4 
 #define COMMAND_RECEIVE_COURSE_DETAILS 5
+  
+#define CONVERSION_FACTOR 1000000
    
 void set_handicap(uint8_t new_handicap);
 uint8_t get_handicap(void);

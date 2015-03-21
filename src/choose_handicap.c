@@ -6,7 +6,7 @@
 #define HANDICAP_KEY 1   
 
 static NumberWindow *s_num_window;
-
+MenuLayer *s_course_list;
 //Handler for the select button being pressed
 static void select_handicap(NumberWindow *window, void *context) {
   //read the value of the number window

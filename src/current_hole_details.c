@@ -173,8 +173,8 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
 
 void update_distance(int latitude, int longitude) {
   //We receive lat and lon as integers - values must be divided by 1000000
-  double lat = (double)latitude / 1000000;
-  double lon = (double)longitude / 1000000;
+  double lat = (double)latitude / CONVERSION_FACTOR;
+  double lon = (double)longitude / CONVERSION_FACTOR;
   int distance = calculate_distance(lat, lon, 53.518832, -2.381675);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat received from phone: %d", latitude);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Long received from phone: %d", longitude);
