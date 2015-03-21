@@ -181,7 +181,7 @@ void update_distance(int latitude, int longitude) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat of hole: %d", (int)(CONVERSION_FACTOR * get_latitude(current_hole_index)));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Long of hole: %d", (int)(CONVERSION_FACTOR * get_longitude(current_hole_index)));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "New distance called: %d", distance);
-  static char yardage[] = "??? Yds";
+  static char yardage[] = ">1000 Yds";
   if (distance < 1000) {
     snprintf(yardage, sizeof(yardage),"%d Yds", distance);
   }

@@ -21,6 +21,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
       Tuple* longitude = dict_find(iter, KEY_LONG);
       Tuple* latitude = dict_find(iter, KEY_LAT);
       //This function is in current_hole_details and should update the distance to current target
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "Coords received from phone - updating distance...");
       update_distance((int)latitude->value->int32, (int)longitude->value->int32);      
       break;
     
