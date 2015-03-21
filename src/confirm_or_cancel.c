@@ -4,7 +4,9 @@
   
 #define MENU_ROW_CANCEL 0
 #define MENU_ROW_CONFIRM 1
-  
+
+// This is a re-usable confirm or cancel dialog - the caller sends the function
+// to callback to - this variable saves the pointer to the function
 static confirm_or_cancel_callback callback_function;
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
@@ -37,6 +39,8 @@ static uint16_t confirm_or_cancel_get_header_height(struct MenuLayer* menu, uint
 static void handle_window_unload(Window* window) {
   destroy_ui();
 }
+// Drawn the rows for cancelling or confirmation - draw the cancel
+// row first - good practise for cancel to be default response
 static void confirm_or_cancel_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* callback_context) {
   switch (cell_index->row) {
     case MENU_ROW_CANCEL:
@@ -47,6 +51,9 @@ static void confirm_or_cancel_draw_row(GContext* ctx, const Layer* cell_layer, M
       break;
   }
 }
+
+// Click handler for the window - we send a true or false back through the callback function to
+// notify the response to the caller
 static void confirm_or_cancel_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
   switch (cell_index->row) {
     case MENU_ROW_CANCEL:
@@ -65,7 +72,7 @@ static void confirm_or_cancel_draw_header(GContext *ctx, const Layer *cell_layer
   menu_cell_basic_header_draw(ctx, cell_layer, "Are you sure?");
 }
 
-
+// Main entry point to the function - the caller sends a pointer to the callback function
 void show_confirm_or_cancel(confirm_or_cancel_callback ptr_confirm_cancel_callback) {
   callback_function = ptr_confirm_cancel_callback;
   initialise_ui();
@@ -74,6 +81,7 @@ void show_confirm_or_cancel(confirm_or_cancel_callback ptr_confirm_cancel_callba
     .draw_row = confirm_or_cancel_draw_row,
     .get_num_rows = confirm_or_cancel_get_num_rows,
     .select_click = confirm_or_cancel_select_click,
+     // had to cast the next line as MenuLayerGetHeaderHeightCallback - not sure why - just didn't work otherwise
     .get_header_height = (MenuLayerGetHeaderHeightCallback)confirm_or_cancel_get_header_height,
   } );
   window_set_window_handlers(s_window, (WindowHandlers) {

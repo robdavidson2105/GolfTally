@@ -32,6 +32,7 @@ static uint16_t holes_menu_get_num_rows(struct MenuLayer* menu, uint16_t section
   return 18;
 }
 
+// Function to draw the row for a specific hole
 static void holes_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* callback_context) {
 
   char title[] = "18 / Par 3 / SI 18";
@@ -49,14 +50,17 @@ static void holes_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuInde
   menu_cell_basic_draw(ctx, cell_layer, title, subtitle, NULL);
 }
 
+// If a hole is selected then show the details window for it
 static void holes_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
   show_current_hole_details(cell_index->row, callback_context);  
 }
 
+// If we have a long-click then show the scorecard view
 static void holes_menu_select_long_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
   show_scorecard();
 }
 
+// Main entry function for choosing the current hole
 void show_choose_hole(void) {
   initialise_ui();
   menu_layer_set_callbacks(s_holes_menu, s_holes_menu, (MenuLayerCallbacks){

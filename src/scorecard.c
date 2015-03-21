@@ -2,7 +2,8 @@
 #include "scorecard.h"
 #include "globals.h"
 
-//template declarations for private functions  
+// Originally used the UI editor and created each label separately
+// ..... it took too much space in RAM so had to re-write using arrays
 void display_scores(void);
 TextLayer* print_label(int x, int y, int w, int h, bool bold, char* value );
 
@@ -163,6 +164,8 @@ static void handle_window_unload(Window* window) {
   destroy_ui();
 }
 
+// Main entry function to show the overall round scorecard
+// It get's called if we do a long-click from the holes menu
 void show_scorecard(void) {
   initialise_ui();
   window_set_window_handlers(s_window, (WindowHandlers) {

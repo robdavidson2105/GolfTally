@@ -2,6 +2,9 @@
 #include "globals.h"
 
 #define PI 3.14159265  
+
+// Gathered together a number of global functions here - there's probably an easier way to avoid
+// doing this - but hey, it works!
   
 static uint8_t handicap;
 uint8_t count_of_courses = 0;
@@ -25,7 +28,6 @@ struct courses {
 } course[20];
 
 void add_course(char* course_id, char* course_name) {
-  //course[count_of_courses].course_id = course_id;
   snprintf(course[count_of_courses].course_id, 11, "%s", course_id);
   snprintf(course[count_of_courses].course_name, 20, "%s", course_name);
   count_of_courses++;
@@ -80,7 +82,6 @@ void set_handicap(uint8_t new_handicap) {
 uint8_t get_handicap(void) {
   return handicap;
 }
-
 
 uint8_t get_par(uint8_t hole_index) {
   return hole[hole_index].par;
@@ -151,6 +152,7 @@ uint8_t calculate_shots(uint8_t si, uint8_t handicap) {
   return shots;
 }
 
+// This is a cosine approximation function - since we don't have math.h
 double cosine(double x) {
   double cos = 0.0;
   x += 1.57079632;
@@ -176,6 +178,7 @@ double cosine(double x) {
   return cos;
 }
 
+// This is a square root approximation function - since no math support
 #define SQRT_MAGIC_F 0x5f3759df 
 float my_sqrt(const float x)
 {
@@ -191,6 +194,9 @@ float my_sqrt(const float x)
   return x*u.x*(1.5f - xhalf*u.x*u.x);// Newton step, repeating increases accuracy 
 }
 
+// calculate distances between two points on surface of sphere - the calculation is an approximation,
+// the cosine function is an approximation, and the square root function isn't exact either .....
+// put it all together and its as accurate as my golf shots 
 int calculate_distance(double lat1, double long1, double lat2, double long2) {
   lat1 = PI * lat1 / 180.0;
   lat2 = PI * lat2 / 180.0;

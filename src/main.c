@@ -10,7 +10,8 @@
 static void init(void);
 static void deinit(void);
   
-
+// handler for a message received from the phone - it's telling us that its either:
+// sending a GPS location, sending a list of courses, or sending the details for a course
 static void in_received_handler(DictionaryIterator *iter, void *context) 
 {
   Tuple* command = dict_find(iter, KEY_COMMAND);
@@ -54,7 +55,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
   }
 }
 
-
+// Here's the main entry point for the app
 int main(void) {
   init();
   app_message_register_inbox_received(in_received_handler);
@@ -69,7 +70,6 @@ static void init(void) {
   if (persist_exists(HANDICAP_KEY)) {
     set_handicap(persist_read_int(HANDICAP_KEY));
   }
-//  testholes();
   show_main_menu();
 }
 

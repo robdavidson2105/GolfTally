@@ -1,3 +1,5 @@
+// Message Queue helper to stack up messages to the Pebble then
+// send them sequentially
 var appMessageQueue = {
     queue: [],
     numTries: 0,
@@ -37,6 +39,7 @@ var appMessageQueue = {
     }
 };
 
+// The command references which are sent to and from the Pebble
 var commands = {
   COMMAND_LIST_COURSES : 0,
   COMMAND_SELECT_COURSE : 1,
@@ -46,33 +49,20 @@ var commands = {
   COMMAND_RECEIVE_COURSE_DETAILS : 5,
 };
 
+// It's easier to send integers to the Pebble
 function cleanCoordinate(coord) {
   return (coord * 1000000)|0;
 }
 
-function sendCourses() {
-  appMessageQueue.clear();
-            appMessageQueue.add({
-              COMMAND: commands.COMMAND_RECEIVE_COURSES,
-              COURSE_ID: 1,
-              COURSE_NAME: "Ellesmere"
-            });
-            appMessageQueue.add({
-              COMMAND: commands.COMMAND_RECEIVE_COURSES,
-              COURSE_ID: 2,
-              COURSE_NAME: "Worsley"
-            });
-            appMessageQueue.send();
-}
-
+//Object to hold the keys and values sent to the GPS function
 var locationOptions = {
 enableHighAccuracy: true,
 maximumAge: 10000,
 timeout: 40000
 };
 
+// Callback function - successful acquisition of GPS coords => send them to the Pebble
 function locationSuccess(pos) {
-  //test coords: 53.518376, -2.379803
   console.log('lat= ' + pos.coords.latitude + ' lon= ' + pos.coords.longitude);
   appMessageQueue.clear();
   appMessageQueue.add({
@@ -87,8 +77,9 @@ function locationError(err) {
 console.log('location error (' + err.code + '): ' + err.message);
 }
 
+// Once we've got the course details from Parse, we parse the json response
+// then push them into an array and send to the Pebble
 function sendCourseDetails(data) {
-  console.log('Received course details from Parse...');
   var holes =[];
   var response = JSON.parse(data);
   var hole_details = response.Holes;
@@ -102,7 +93,6 @@ function sendCourseDetails(data) {
       LONG: cleanCoordinate(parseFloat(hole_details[i].Long))
     });
   }
-  console.log(JSON.stringify(holes));
   
   appMessageQueue.clear();
   for (var n = 0; n < 18; n++) {
@@ -115,18 +105,14 @@ function sendCourseDetails(data) {
       LONG: holes[n].LONG
     });
   }
-  console.log('Sending course details to Pebble...');
   appMessageQueue.send();
 }
 
+// Once we've received the list of courses from Parse then
+// parse them as json and then transfer them to the Pebble
 function sendCourseList(data) {
-  console.log('Response received...');
-  console.log(JSON.stringify(data));
   var response = JSON.parse(data);
   var courses = response.results;
-  console.log(JSON.stringify(response));
-  console.log(courses[0].Name);
-  console.log("Number of courses: " + courses.length);
   appMessageQueue.clear();
   for (var i = 0; i < courses.length; i++) {
     appMessageQueue.add({
@@ -136,11 +122,11 @@ function sendCourseList(data) {
             });
   }
   appMessageQueue.send();
-  
 }
 
+// The Pebble has requested the details for a specific course - so send
+// an async request for the Parse object
 function getCourseDetails(courseID) {
-  console.log('Getting course details...');
   var xhr = new XMLHttpRequest();
   var url = 'https://api.parse.com/1/classes/Course/' + courseID;
   xhr.open('GET', url, true);
@@ -151,15 +137,14 @@ function getCourseDetails(courseID) {
     console.log(xhr.responseText);
     sendCourseDetails(xhr.responseText);
   };
-
   xhr.send();
 }
 
+// The Pebble has requested the list of courses from Parse - so send an async request for them
 function getCourseList() {
   console.log('Getting course list...');
   var xhr = new XMLHttpRequest();
   var url = 'https://api.parse.com/1/classes/Course';
-  //var url = 'https://cfjEGfMBX9PMvwb1ien9G5J6ttN6C3zDozBoL0Kp:javascript-key=E4gtLnecX313jK3D8iSbreyDKUyt09aKTaw8A6Ki@api.parse.com/1/classes/Course';
   xhr.open('GET', url, true);
   xhr.responseType = 'json';
   xhr.setRequestHeader('X-Parse-Application-Id','cfjEGfMBX9PMvwb1ien9G5J6ttN6C3zDozBoL0Kp');
@@ -168,33 +153,31 @@ function getCourseList() {
     console.log(xhr.responseText);
     sendCourseList(xhr.responseText);
   };
-
   xhr.send();
 }
+
+// Listen out for messages from the Pebble
 Pebble.addEventListener("appmessage", 
 function(e) { 
-  console.log("Received " + e.payload.COMMAND );
   if (e.payload.COMMAND !== null) {
         switch (e.payload.COMMAND) {
+        // The Pebble wants to know the list of courses    
         case commands.COMMAND_LIST_COURSES:
-            //console.log("List Courses");
             getCourseList();
             break;
             
+        // A particular course has been selected so the Pebble needs the details
         case commands.COMMAND_SELECT_COURSE:         
-            console.log("Select Course " + e.payload.COURSE_ID);
             getCourseDetails(e.payload.COURSE_ID);
             break;
-            
+        
+        // The current GPS position has been requested by the Pebble
         case commands.COMMAND_GET_LOCATION:         
-            //console.log("Get Location");
             navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
             break;
         }
- 
     } else {
         appMessageQueue.clear();
     }
-  
 } 
 );

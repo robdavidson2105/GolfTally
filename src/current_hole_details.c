@@ -171,6 +171,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   // The message received handler is in main.c - it'll call the following update function
 }
 
+// Once we've received current coords then calculate the distance in yards to the next target
 void update_distance(int latitude, int longitude) {
   //We receive lat and lon as integers - values must be divided by 1000000
   double lat = (double)latitude / CONVERSION_FACTOR;

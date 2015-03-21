@@ -38,38 +38,43 @@ static void handle_window_unload(Window* window) {
   destroy_ui();
 }
 
-// Number of rows in the main menu
+// Number of rows in the main menu - it changes once we've selected a course - or we've
+// started a round
 static uint16_t main_menu_get_num_rows(struct MenuLayer* menu, uint16_t section_index, void* callback_context) {
   if (is_round_in_progress()) {
+    // If there's a round in progress then we must need all the rows
     return 4;
   } else {
     if (get_selected_course_index() == -1) {
-    //If there's no round in progress then don't draw the clear scores row
+    // If there's no course selected then don't draw the Start Round row
       return 2;
     } else {
+      // If there's no round in progress then don't draw the clear scores row
       return 3;
     }
   }
 }
 
-// Draw the menu rows
+/// Draw the menu rows
 static void main_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* callback_context) {
   
   switch (cell_index->row) {
+    // Choose the handicap
+    // had to put a ; at the end of the next line - otherwise the compiler didn't like it
     case MENU_ROW_SET_HANDICAP: ;
       static char subtitle[] = "My handicap: 18";
       snprintf(subtitle, sizeof(subtitle), "My handicap: %d", get_handicap());
       menu_cell_basic_draw(ctx, cell_layer, "Set Handicap", subtitle, NULL);
       break;
-    
+    // Choose the course
     case MENU_ROW_CHOOSE_COURSE:
       if (get_selected_course_index() == -1) {
         menu_cell_basic_draw(ctx, cell_layer, "Choose Course", "None selected", NULL);  
       } else {
         menu_cell_basic_draw(ctx, cell_layer, "Choose Course", get_course(get_selected_course_index()), NULL);
-      }
-      
+      } 
       break;
+    // Start the game
     case MENU_ROW_START_GAME:
       //If there's a round in progress then text should say continue
       if (is_round_in_progress()) {
@@ -80,7 +85,7 @@ static void main_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex
         } 
       }
       break;
-    
+    // Clear all the scores
     case MENU_ROW_CLEAR_ROUND:
       //If there's no round in progress then don't draw the clear scores row
       if (is_round_in_progress()) {
@@ -127,7 +132,9 @@ void confirm_clear_scores_callback(bool result) {
         set_my_strokes(0, 0);
       }
     clear_round_in_progress();
+    // We need to reload the data in the MenuLayer
     menu_layer_reload_data(s_main_menu);
+    // The MenuLayer needs to redraw otherwise it doesn't scroll correctly
     layer_mark_dirty(menu_layer_get_layer(s_main_menu));
   }
 }

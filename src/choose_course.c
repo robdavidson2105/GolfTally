@@ -27,6 +27,9 @@ static void handle_window_unload(Window* window) {
   destroy_ui();
 }
 
+// This function is called from show_choose_course() - but is only called if there's no courses already
+// loaded
+// TODO: allow a reload of courses, eg, following long-click
 static void request_courses(void) {
   // Send a request to the phone to get the list of courses
   DictionaryIterator *iter;
@@ -38,14 +41,15 @@ static void request_courses(void) {
   // one-by-one and call the menu redraw function after each course
 }
 
+// Function called when a course is selected from the menu
 static void course_list_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
   set_selected_course_index(cell_index->row);
   // Send a request to the phone to get the details of the selected course
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
   Tuplet command = TupletInteger(KEY_COMMAND, COMMAND_SELECT_COURSE);
+  // The course id is the ObjectID of the Parse record
   Tuplet value = TupletCString(KEY_COURSE_ID, get_course_id(cell_index->row));
-  // Tuplet value = TupletInteger(KEY_COURSE_ID, cell_index->row);
   dict_write_tuplet(iter, &command);
   dict_write_tuplet(iter, &value);
   app_message_outbox_send();
@@ -64,6 +68,7 @@ static void course_list_draw_row(GContext* ctx, const Layer* cell_layer, MenuInd
 
 void show_choose_course(void) {
   initialise_ui();
+  // If we haven't got any courses loaded then call the request_courses() function
   if (get_count_of_courses() == 0) {
     request_courses();
   }
