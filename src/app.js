@@ -77,8 +77,8 @@ function locationSuccess(pos) {
   appMessageQueue.clear();
   appMessageQueue.add({
     COMMAND: commands.COMMAND_RECEIVE_LOCATION,
-    LAT: cleanCoordinate(53.518376),
-    LONG: cleanCoordinate(-2.379803)
+    LAT: cleanCoordinate(pos.coords.latitude),
+    LONG: cleanCoordinate(pos.coords.longitude)
   });
   appMessageQueue.send();
 }

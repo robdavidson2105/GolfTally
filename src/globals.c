@@ -105,6 +105,13 @@ uint8_t get_my_strokes(uint8_t hole_index) {
   return hole[hole_index].my_strokes;
 };
 
+double get_latitude(uint8_t hole_index) {
+  return hole[hole_index].latitude;
+}
+
+double get_longitude(uint8_t hole_index) {
+  return hole[hole_index].longitude;
+}
 
 void set_my_strokes(uint8_t hole_index, int8_t new_strokes) {
   if (new_strokes <= 0) {

@@ -110,7 +110,7 @@ static void initialise_ui(void) {
   s_distance_to_target = text_layer_create(GRect(4, 60, 113, 23));
   text_layer_set_background_color(s_distance_to_target, GColorClear);
   text_layer_set_text_color(s_distance_to_target, GColorWhite);
-  text_layer_set_text(s_distance_to_target, "350 Yds");
+  text_layer_set_text(s_distance_to_target, "??? Yds");
   text_layer_set_text_alignment(s_distance_to_target, GTextAlignmentCenter);
   text_layer_set_font(s_distance_to_target, s_res_roboto_condensed_21);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_distance_to_target);
@@ -175,9 +175,11 @@ void update_distance(int latitude, int longitude) {
   //We receive lat and lon as integers - values must be divided by 1000000
   double lat = (double)latitude / CONVERSION_FACTOR;
   double lon = (double)longitude / CONVERSION_FACTOR;
-  int distance = calculate_distance(lat, lon, 53.518832, -2.381675);
+  int distance = calculate_distance(lat, lon, get_latitude(current_hole_index), get_longitude(current_hole_index));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat received from phone: %d", latitude);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Long received from phone: %d", longitude);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat of hole: %d", (int)(CONVERSION_FACTOR * get_latitude(current_hole_index)));
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Long of hole: %d", (int)(CONVERSION_FACTOR * get_longitude(current_hole_index)));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "New distance called: %d", distance);
   static char yardage[] = "??? Yds";
   if (distance < 1000) {

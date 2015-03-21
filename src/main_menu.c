@@ -43,8 +43,12 @@ static uint16_t main_menu_get_num_rows(struct MenuLayer* menu, uint16_t section_
   if (is_round_in_progress()) {
     return 4;
   } else {
+    if (get_selected_course_index() == -1) {
     //If there's no round in progress then don't draw the clear scores row
-    return 4;
+      return 2;
+    } else {
+      return 3;
+    }
   }
 }
 
@@ -71,7 +75,9 @@ static void main_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex
       if (is_round_in_progress()) {
         menu_cell_basic_draw(ctx, cell_layer, "Continue round", NULL, NULL);
       } else {
-        menu_cell_basic_draw(ctx, cell_layer, "Start round", NULL, NULL);
+        if (get_selected_course_index() != -1) {
+          menu_cell_basic_draw(ctx, cell_layer, "Start round", NULL, NULL);
+        } 
       }
       break;
     
@@ -100,6 +106,8 @@ static void main_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index
       if (get_selected_course_index() != -1) {
         set_round_in_progress();
         show_choose_hole();
+        menu_layer_reload_data(s_main_menu);
+        layer_mark_dirty(menu_layer_get_layer(s_main_menu));
       }
       break;
     
@@ -117,9 +125,10 @@ void confirm_clear_scores_callback(bool result) {
   if (result) {
     for (int i = 0; i < 18; i++) {
         set_my_strokes(0, 0);
-        clear_round_in_progress();
-        menu_layer_reload_data(s_main_menu);
       }
+    clear_round_in_progress();
+    menu_layer_reload_data(s_main_menu);
+    layer_mark_dirty(menu_layer_get_layer(s_main_menu));
   }
 }
 
