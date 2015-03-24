@@ -93,7 +93,8 @@ function sendCourseDetails(data) {
       LONG: cleanCoordinate(parseFloat(hole_details[i].Long))
     });
   }
-  
+  //TODO: implement the appMessageQueue add instead of holes.push
+  //The two loops are left over from testing
   appMessageQueue.clear();
   for (var n = 0; n < 18; n++) {
     appMessageQueue.add({

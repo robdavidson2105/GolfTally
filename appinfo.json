@@ -18,8 +18,8 @@
     "resources": {
         "media": [
             {
-                "file": "images/target.png",
-                "name": "ICON_ACTIONBAR_TARGET",
+                "file": "images/flag.png",
+                "name": "ICON_ACTIONBAR_FLAG",
                 "type": "png"
             },
             {
@@ -28,8 +28,8 @@
                 "type": "png"
             },
             {
-                "file": "images/flag.png",
-                "name": "ICON_ACTIONBAR_FLAG",
+                "file": "images/target.png",
+                "name": "ICON_ACTIONBAR_TARGET",
                 "type": "png"
             }
         ]
