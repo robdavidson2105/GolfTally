@@ -3,6 +3,14 @@
 
 #define PI 3.14159265  
 
+#define HANDICAP_KEY 1 
+#define COURSE_NAME_KEY 10
+#define COURSE_ID_KEY 11
+#define PAR_KEY 20
+#define SI_KEY 40
+#define LAT_KEY 60
+#define LON_KEY 80
+  
 // Gathered together a number of global functions here - there's probably an easier way to avoid
 // doing this - but hey, it works!
   
@@ -210,3 +218,72 @@ int calculate_distance(double lat1, double long1, double lat2, double long2) {
   return (int)(distance);
 }
 
+void save_state(void) {
+  int8_t course_index = get_selected_course_index();
+  if (course_index == -1) {
+    // There's no courses selected so nothing to save so bail out
+    return;
+  }
+  persist_write_string(COURSE_NAME_KEY, course[course_index].course_name);
+  persist_write_string(COURSE_ID_KEY, course[course_index].course_id);
+  
+  for (int i = 0; i < 18; i++) {
+    persist_write_int(PAR_KEY + i, hole[i].par);
+    persist_write_int(SI_KEY + i, hole[i].si);
+    persist_write_int(LAT_KEY + i, (int)(hole[i].latitude * CONVERSION_FACTOR));
+    persist_write_int(LON_KEY + i, (int)(hole[i].longitude * CONVERSION_FACTOR));
+    /*
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Writing - hole %d, si %d, par %d, lat %d, long %d", 
+              (int)i,
+              (int)hole[i].par,
+              (int)hole[i].si,
+              (int)(hole[i].latitude * CONVERSION_FACTOR),
+              (int)(hole[i].longitude * CONVERSION_FACTOR)
+             );
+             */
+  }
+  
+}
+
+void restore_state(void) {
+  // Use a default handicap of 18 - but see if we've stored a value in persistent storage
+  set_handicap(18);
+  if (persist_exists(HANDICAP_KEY)) {
+    set_handicap(persist_read_int(HANDICAP_KEY));
+  }
+  
+  // Now lets see if we've got the details of a course cached in storage
+  if (!persist_exists(COURSE_NAME_KEY)) {
+    // bail out of function if no courses found
+    return;
+  }
+  if (!persist_exists(COURSE_ID_KEY)) {
+    // bail out of function if not course id found
+    return;
+  }
+  
+  // So at this point we must have a course cached - so lets load all the details
+  bool no_errors = true;  // .... but lets watch out for any errors in loading
+  char course_id[11];
+  char course_name[20];
+  persist_read_string(COURSE_NAME_KEY, course_name, sizeof(course_name));
+  persist_read_string(COURSE_ID_KEY, course_id, sizeof(course_id));
+  add_course(course_id, course_name);
+  selected_course_index = 0;
+  for (int i = 0; i < 18; i++) {
+    hole[i].par = persist_read_int(PAR_KEY + i);
+    hole[i].si = persist_read_int(SI_KEY + i);
+    hole[i].latitude = (double)persist_read_int(LAT_KEY + i)/CONVERSION_FACTOR;
+    hole[i].longitude = (double)persist_read_int(LON_KEY + i)/CONVERSION_FACTOR;
+    /*
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Retrieved - hole %d, si %d, par %d, lat %d, long %d", 
+              (int)i,
+              (int)hole[i].par,
+              (int)hole[i].si,
+              (int)(hole[i].latitude * CONVERSION_FACTOR),
+              (int)(hole[i].longitude * CONVERSION_FACTOR)
+             );
+             */
+  }
+  
+}

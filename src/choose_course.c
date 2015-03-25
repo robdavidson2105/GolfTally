@@ -69,9 +69,10 @@ static void course_list_draw_row(GContext* ctx, const Layer* cell_layer, MenuInd
 void show_choose_course(void) {
   initialise_ui();
   // If we haven't got any courses loaded then call the request_courses() function
-  if (get_count_of_courses() == 0) {
-    request_courses();
-  }
+  // if (get_count_of_courses() == 0) {
+  reset_course_count();  
+  request_courses();
+
   menu_layer_set_callbacks(s_course_list, s_course_list, (MenuLayerCallbacks){
     .draw_row = course_list_draw_row,
     .get_num_rows = course_list_get_num_rows,

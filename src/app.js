@@ -1,5 +1,6 @@
 // Message Queue helper to stack up messages to the Pebble then
 // send them sequentially
+/* from https://raw.github.com/Skipstone/Skipstone/master/js/appmessage.js */
 var appMessageQueue = {
     queue: [],
     numTries: 0,
