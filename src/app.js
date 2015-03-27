@@ -58,8 +58,8 @@ function cleanCoordinate(coord) {
 //Object to hold the keys and values sent to the GPS function
 var locationOptions = {
 enableHighAccuracy: true,
-maximumAge: 10000,
-timeout: 40000
+maximumAge: 0,
+timeout: 10000
 };
 
 // Callback function - successful acquisition of GPS coords => send them to the Pebble

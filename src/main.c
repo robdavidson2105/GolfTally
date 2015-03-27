@@ -40,7 +40,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
       Tuple* hole_par = dict_find(iter, KEY_PAR);
       Tuple* lon = dict_find(iter, KEY_LONG);
       Tuple* lat = dict_find(iter, KEY_LAT);
-/*    
+    
       APP_LOG(APP_LOG_LEVEL_DEBUG, "Msg received - hole %d, si %d, par %d, lat %d, long %d", 
               (int)hole_index->value->int32,
               (int)hole_si->value->int32,
@@ -48,7 +48,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
               (int)lat->value->int32,
               (int)lon->value->int32
              );
-             */
+             
       setup_holes((uint8_t)hole_index->value->int32,
                   (uint8_t)hole_par->value->int32,
                   (uint8_t)hole_si->value->int32,
