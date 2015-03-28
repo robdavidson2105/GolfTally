@@ -199,6 +199,8 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (!refresh_gps) {      
     refresh_gps = true;
     request_gps();
+    text_layer_set_text(s_distance_to_target, "???");
+    layer_mark_dirty(s_distance_to_target);
   }
   
 }
