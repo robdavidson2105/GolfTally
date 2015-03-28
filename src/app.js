@@ -45,10 +45,13 @@ var commands = {
   COMMAND_LIST_COURSES : 0,
   COMMAND_SELECT_COURSE : 1,
   COMMAND_GET_LOCATION : 2,
-  COMMAND_RECEIVE_COURSES : 3,
-  COMMAND_RECEIVE_LOCATION : 4,
-  COMMAND_RECEIVE_COURSE_DETAILS : 5,
+  COMMAND_CLEAR_LOCATION_UPDATES : 3,
+  COMMAND_RECEIVE_COURSES : 4,
+  COMMAND_RECEIVE_LOCATION : 5,
+  COMMAND_RECEIVE_COURSE_DETAILS : 6,
 };
+
+var gpsID;
 
 // It's easier to send integers to the Pebble
 function cleanCoordinate(coord) {
@@ -175,7 +178,11 @@ function(e) {
         
         // The current GPS position has been requested by the Pebble
         case commands.COMMAND_GET_LOCATION:         
-            navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
+            gpsID = navigator.geolocation.watchPosition(locationSuccess, locationError, locationOptions);
+            break;
+            
+          case commands.COMMAND_CLEAR_LOCATION_UPDATES:
+            navigator.geolocation.clearWatch(gpsID);
             break;
         }
     } else {

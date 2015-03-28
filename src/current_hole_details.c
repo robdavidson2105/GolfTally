@@ -5,6 +5,7 @@
   
 static uint8_t current_hole_index;
 static MenuLayer *callback_menu;
+static AppTimer *timer_handle;
   
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -13,7 +14,7 @@ static GBitmap *s_res_icon_actionbar_flag;
 static GBitmap *s_res_icon_actionbar_club;
 static GFont s_res_gothic_14;
 static GFont s_res_bitham_30_black;
-static GFont s_res_roboto_condensed_21;
+static GFont s_res_gothic_24;
 static ActionBarLayer *s_actionbarlayer;
 static TextLayer *s_hole_title;
 static TextLayer *s_distance_to_target_title;
@@ -36,7 +37,7 @@ static void initialise_ui(void) {
   s_res_icon_actionbar_club = gbitmap_create_with_resource(RESOURCE_ID_ICON_ACTIONBAR_CLUB);
   s_res_gothic_14 = fonts_get_system_font(FONT_KEY_GOTHIC_14);
   s_res_bitham_30_black = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
-  s_res_roboto_condensed_21 = fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21);
+  s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_24);
   // s_actionbarlayer
   s_actionbarlayer = action_bar_layer_create();
   action_bar_layer_add_to_window(s_actionbarlayer, s_window);
@@ -47,16 +48,16 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_actionbarlayer);
   
   // s_hole_title
-  s_hole_title = text_layer_create(GRect(0, 0, 121, 19));
+  s_hole_title = text_layer_create(GRect(0, 0, 121, 24));
   text_layer_set_background_color(s_hole_title, GColorClear);
   text_layer_set_text_color(s_hole_title, GColorWhite);
   text_layer_set_text(s_hole_title, "Hole 1 - Par 3");
   text_layer_set_text_alignment(s_hole_title, GTextAlignmentCenter);
-  text_layer_set_font(s_hole_title, s_res_gothic_14);
+  text_layer_set_font(s_hole_title, s_res_gothic_24);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_hole_title);
   
   // s_distance_to_target_title
-  s_distance_to_target_title = text_layer_create(GRect(2, 43, 118, 16));
+  s_distance_to_target_title = text_layer_create(GRect(2, 47, 118, 16));
   text_layer_set_background_color(s_distance_to_target_title, GColorClear);
   text_layer_set_text_color(s_distance_to_target_title, GColorWhite);
   text_layer_set_text(s_distance_to_target_title, "Distance to pin");
@@ -107,21 +108,21 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_points);
   
   // s_distance_to_target
-  s_distance_to_target = text_layer_create(GRect(4, 60, 113, 23));
+  s_distance_to_target = text_layer_create(GRect(4, 60, 113, 35));
   text_layer_set_background_color(s_distance_to_target, GColorClear);
   text_layer_set_text_color(s_distance_to_target, GColorWhite);
-  text_layer_set_text(s_distance_to_target, "??? Yds");
+  text_layer_set_text(s_distance_to_target, "???");
   text_layer_set_text_alignment(s_distance_to_target, GTextAlignmentCenter);
-  text_layer_set_font(s_distance_to_target, s_res_roboto_condensed_21);
+  text_layer_set_font(s_distance_to_target, s_res_bitham_30_black);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_distance_to_target);
   
   // s_hole_subtitle
-  s_hole_subtitle = text_layer_create(GRect(3, 15, 117, 17));
+  s_hole_subtitle = text_layer_create(GRect(3, 22, 117, 24));
   text_layer_set_background_color(s_hole_subtitle, GColorClear);
   text_layer_set_text_color(s_hole_subtitle, GColorWhite);
-  text_layer_set_text(s_hole_subtitle, "SI 18 - 2 shots rec'd");
+  text_layer_set_text(s_hole_subtitle, "SI 18 - 2 shots");
   text_layer_set_text_alignment(s_hole_subtitle, GTextAlignmentCenter);
-  text_layer_set_font(s_hole_subtitle, s_res_gothic_14);
+  text_layer_set_font(s_hole_subtitle, s_res_gothic_24);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_hole_subtitle);
 }
 
@@ -144,7 +145,36 @@ static void destroy_ui(void) {
 }
 // END AUTO-GENERATED UI CODE
 
+static void request_gps() {
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  Tuplet value = TupletInteger(KEY_COMMAND, COMMAND_GET_LOCATION);
+  dict_write_tuplet(iter, &value);
+  app_message_outbox_send();
+  // The message received handler is in main.c - it'll call the following update_distance function
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "request gps called");
+}
+
+static void cancel_gps() {
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  Tuplet value = TupletInteger(KEY_COMMAND, COMMAND_CLEAR_LOCATION_UPDATES);
+  dict_write_tuplet(iter, &value);
+  app_message_outbox_send();
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "cancel gps called");
+}
+
 static void handle_window_unload(Window* window) {
+  /*
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Unloading window");
+    // leaving this window so disable gps updates
+  refresh_gps = false;
+  // and terminate gps updates if any are scheduled
+  if (timer_handle != NULL) {
+    app_timer_cancel(timer_handle);
+  }
+  */
+  cancel_gps();
   destroy_ui();
 }
 
@@ -161,14 +191,14 @@ void display_shots(void) {
   text_layer_set_text(s_points, points);
 }
 
+
+
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   // Send a request to the phone to update the current location
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-  Tuplet value = TupletInteger(KEY_COMMAND, COMMAND_GET_LOCATION);
-  dict_write_tuplet(iter, &value);
-  app_message_outbox_send();
-  // The message received handler is in main.c - it'll call the following update function
+  // and set refresh_gps to true so that we refresh every 20 seconds
+  refresh_gps = true;
+  request_gps();
+  
 }
 
 // Once we've received current coords then calculate the distance in yards to the next target
@@ -182,11 +212,21 @@ void update_distance(int latitude, int longitude) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat of hole: %d", (int)(CONVERSION_FACTOR * get_latitude(current_hole_index)));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Long of hole: %d", (int)(CONVERSION_FACTOR * get_longitude(current_hole_index)));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "New distance called: %d", distance);
-  static char yardage[] = ">100000 Yds";
-  if (distance < 100000) {
-    snprintf(yardage, sizeof(yardage),"%d Yds", distance);
+  
+  // Display the yardage on-screen
+  static char yardage[] = ">2000";
+  if (distance < 2000) {
+    snprintf(yardage, sizeof(yardage),"%d", distance);
   }
   text_layer_set_text(s_distance_to_target, yardage);
+  /*
+  // Now schedule a callback to update the GPS - but check we've not stopped asking for requests first
+  if (refresh_gps) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Schedule another request");
+    timer_handle = app_timer_register(5000, request_gps, NULL);
+  }
+  */
+  
 }
 
 //If the select button is pressed then move onto the next hole....
@@ -245,8 +285,8 @@ void show_current_hole_details(uint8_t hole_index, void *callback_context) {
   snprintf(hole_number, sizeof(hole_number), "Hole %d - Par %d", hole_index+1, get_par(hole_index));
   text_layer_set_text(s_hole_title, hole_number);
   
-  static char hole_subtitle[] = "SI 18 - 2 shots rec'd";
-  snprintf(hole_subtitle, sizeof(hole_subtitle), "SI %d - %d shots rec'd", get_si(hole_index), get_my_shots_received(hole_index));
+  static char hole_subtitle[] = "SI 18 - 2 shots";
+  snprintf(hole_subtitle, sizeof(hole_subtitle), "SI %d - %d shots", get_si(hole_index), get_my_shots_received(hole_index));
   text_layer_set_text(s_hole_subtitle, hole_subtitle);
   
   display_shots();

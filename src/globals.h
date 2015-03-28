@@ -11,9 +11,10 @@
 #define COMMAND_LIST_COURSES 0
 #define COMMAND_SELECT_COURSE 1
 #define COMMAND_GET_LOCATION 2
-#define COMMAND_RECEIVE_COURSES 3
-#define COMMAND_RECEIVE_LOCATION 4 
-#define COMMAND_RECEIVE_COURSE_DETAILS 5
+#define COMMAND_CLEAR_LOCATION_UPDATES 3
+#define COMMAND_RECEIVE_COURSES 4
+#define COMMAND_RECEIVE_LOCATION 5 
+#define COMMAND_RECEIVE_COURSE_DETAILS 6
   
 #define CONVERSION_FACTOR 1000000
 
@@ -31,7 +32,7 @@ void reset_course_count(void);
 bool is_round_in_progress(void);
 void set_round_in_progress(void);
 void clear_round_in_progress(void);
-
+extern bool refresh_gps;
 uint8_t get_par(uint8_t hole_index);
 uint8_t get_si(uint8_t hole_index);
 int8_t get_my_net(uint8_t hole_index);

@@ -18,6 +18,7 @@ static uint8_t handicap;
 uint8_t count_of_courses = 0;
 int8_t selected_course_index = -1;
 static bool round_in_progress = false;
+bool refresh_gps = false;
 
 struct holes {
   uint8_t par;
@@ -285,5 +286,7 @@ void restore_state(void) {
              );
              */
   }
-  
+  // Now calculate the shots received for the current handicap
+  // just use the set_handicap function
+  set_handicap(get_handicap());
 }
