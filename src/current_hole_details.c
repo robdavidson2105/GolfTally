@@ -5,7 +5,7 @@
   
 static uint8_t current_hole_index;
 static MenuLayer *callback_menu;
-static AppTimer *timer_handle;
+//static AppTimer *timer_handle;
   
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
