@@ -200,7 +200,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     refresh_gps = true;
     request_gps();
     text_layer_set_text(s_distance_to_target, "???");
-    layer_mark_dirty(s_distance_to_target);
+    layer_mark_dirty(window_get_root_layer(s_window));
   }
   
 }
