@@ -12,9 +12,9 @@ static Window *s_window;
 static GBitmap *s_res_icon_actionbar_target;
 static GBitmap *s_res_icon_actionbar_flag;
 static GBitmap *s_res_icon_actionbar_club;
-static GFont s_res_bitham_30_black;
 static GFont s_res_roboto_condensed_21;
 static GFont s_res_gothic_18;
+static GFont s_res_bitham_30_black;
 static ActionBarLayer *s_actionbarlayer;
 static TextLayer *s_hole_title;
 static TextLayer *s_distance_to_target_title;
@@ -35,9 +35,9 @@ static void initialise_ui(void) {
   s_res_icon_actionbar_target = gbitmap_create_with_resource(RESOURCE_ID_ICON_ACTIONBAR_TARGET);
   s_res_icon_actionbar_flag = gbitmap_create_with_resource(RESOURCE_ID_ICON_ACTIONBAR_FLAG);
   s_res_icon_actionbar_club = gbitmap_create_with_resource(RESOURCE_ID_ICON_ACTIONBAR_CLUB);
-  s_res_bitham_30_black = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
   s_res_roboto_condensed_21 = fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21);
   s_res_gothic_18 = fonts_get_system_font(FONT_KEY_GOTHIC_18);
+  s_res_bitham_30_black = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
   // s_actionbarlayer
   s_actionbarlayer = action_bar_layer_create();
   action_bar_layer_add_to_window(s_actionbarlayer, s_window);
@@ -48,10 +48,10 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_actionbarlayer);
   
   // s_hole_title
-  s_hole_title = text_layer_create(GRect(0, 0, 121, 25));
+  s_hole_title = text_layer_create(GRect(0, 0, 123, 25));
   text_layer_set_background_color(s_hole_title, GColorClear);
   text_layer_set_text_color(s_hole_title, GColorWhite);
-  text_layer_set_text(s_hole_title, "Hole 1 - Par 3");
+  text_layer_set_text(s_hole_title, "18 - Par 3");
   text_layer_set_text_alignment(s_hole_title, GTextAlignmentCenter);
   text_layer_set_font(s_hole_title, s_res_roboto_condensed_21);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_hole_title);
@@ -114,7 +114,7 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_distance_to_target);
   
   // s_hole_subtitle
-  s_hole_subtitle = text_layer_create(GRect(3, 20, 117, 24));
+  s_hole_subtitle = text_layer_create(GRect(0, 20, 124, 24));
   text_layer_set_background_color(s_hole_subtitle, GColorClear);
   text_layer_set_text_color(s_hole_subtitle, GColorWhite);
   text_layer_set_text(s_hole_subtitle, "SI 18 - 2 shots");
