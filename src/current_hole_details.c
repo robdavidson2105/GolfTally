@@ -204,10 +204,9 @@ void update_distance(int latitude, int longitude) {
   double lat = (double)latitude / CONVERSION_FACTOR;
   double lon = (double)longitude / CONVERSION_FACTOR;
   int distance = calculate_distance(lat, lon, get_latitude(current_hole_index), get_longitude(current_hole_index));
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat received from phone: %d", latitude);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Long received from phone: %d", longitude);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat of hole: %d", (int)(CONVERSION_FACTOR * get_latitude(current_hole_index)));
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Long of hole: %d", (int)(CONVERSION_FACTOR * get_longitude(current_hole_index)));
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Coords received from phone: %d,%d", latitude, longitude);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat of hole: %d", (int)(CONVERSION_FACTOR * get_latitude(current_hole_index)));
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Long of hole: %d", (int)(CONVERSION_FACTOR * get_longitude(current_hole_index)));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "New distance called: %d", distance);
   
   // Display the yardage on-screen
@@ -216,14 +215,6 @@ void update_distance(int latitude, int longitude) {
     snprintf(yardage, sizeof(yardage),"%d", distance);
   }
   text_layer_set_text(s_distance_to_target, yardage);
-  /*
-  // Now schedule a callback to update the GPS - but check we've not stopped asking for requests first
-  if (refresh_gps) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Schedule another request");
-    timer_handle = app_timer_register(5000, request_gps, NULL);
-  }
-  */
-  
 }
 
 //If the select button is pressed then move onto the next hole....
