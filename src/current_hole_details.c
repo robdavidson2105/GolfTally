@@ -171,6 +171,7 @@ static void handle_window_unload(Window* window) {
     app_timer_cancel(timer_handle);
   }
   */
+  refresh_gps = false;
   cancel_gps();
   destroy_ui();
 }
@@ -192,9 +193,13 @@ void display_shots(void) {
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   // Send a request to the phone to update the current location
-  // and set refresh_gps to true so that we refresh every 20 seconds
-  refresh_gps = true;
-  request_gps();
+  // and we'll then receive updates from the phone
+  
+  // Avoid requesting multiple updates - things go wrong!
+  if (!refresh_gps) {      
+    refresh_gps = true;
+    request_gps();
+  }
   
 }
 
