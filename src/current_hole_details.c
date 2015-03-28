@@ -108,7 +108,7 @@ static void initialise_ui(void) {
   s_distance_to_target = text_layer_create(GRect(4, 60, 113, 35));
   text_layer_set_background_color(s_distance_to_target, GColorClear);
   text_layer_set_text_color(s_distance_to_target, GColorWhite);
-  text_layer_set_text(s_distance_to_target, "???");
+  text_layer_set_text(s_distance_to_target, "---");
   text_layer_set_text_alignment(s_distance_to_target, GTextAlignmentCenter);
   text_layer_set_font(s_distance_to_target, s_res_bitham_30_black);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_distance_to_target);
