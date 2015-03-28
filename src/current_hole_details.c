@@ -278,8 +278,8 @@ void show_current_hole_details(uint8_t hole_index, void *callback_context) {
   window_set_click_config_provider(s_window, click_config_provider);
   
   //Setup the initial values for the hole
-  static char hole_number[] = "Hole 18 - Par 3";
-  snprintf(hole_number, sizeof(hole_number), "Hole %d - Par %d", hole_index+1, get_par(hole_index));
+  static char hole_number[] = "18 - Par 3";
+  snprintf(hole_number, sizeof(hole_number), "%d - Par %d", hole_index+1, get_par(hole_index));
   text_layer_set_text(s_hole_title, hole_number);
   
   static char hole_subtitle[] = "SI 18 - 2 shots";
