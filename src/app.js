@@ -67,7 +67,7 @@ timeout: 10000
 
 // Callback function - successful acquisition of GPS coords => send them to the Pebble
 function locationSuccess(pos) {
-  console.log('lat= ' + pos.coords.latitude + ' lon= ' + pos.coords.longitude);
+  // console.log('lat= ' + pos.coords.latitude + ' lon= ' + pos.coords.longitude);
   appMessageQueue.clear();
   appMessageQueue.add({
     COMMAND: commands.COMMAND_RECEIVE_LOCATION,
@@ -136,10 +136,10 @@ function getCourseDetails(courseID) {
   var url = 'https://api.parse.com/1/classes/Course/' + courseID;
   xhr.open('GET', url, true);
   xhr.responseType = 'json';
-  xhr.setRequestHeader('X-Parse-Application-Id','cfjEGfMBX9PMvwb1ien9G5J6ttN6C3zDozBoL0Kp');
-  xhr.setRequestHeader('X-Parse-REST-API-Key','a7EWINL4OUZ4lEuA4t7X9iCwQ1wPl0fRliCGnQmU');
+  xhr.setRequestHeader('X-Parse-Application-Id','StLdNROxObnXnsMmMQy04IGTESb3knvycrHsuiXH');
+  xhr.setRequestHeader('X-Parse-REST-API-Key','ncucKuYWWez3FfbF1UPEehLqgnFkhyQZYzLfuCPv');
   xhr.onload = function () {
-    console.log(xhr.responseText);
+    // console.log(xhr.responseText);
     sendCourseDetails(xhr.responseText);
   };
   xhr.send();
@@ -147,15 +147,15 @@ function getCourseDetails(courseID) {
 
 // The Pebble has requested the list of courses from Parse - so send an async request for them
 function getCourseList() {
-  console.log('Getting course list...');
+  // console.log('Getting course list...');
   var xhr = new XMLHttpRequest();
   var url = 'https://api.parse.com/1/classes/Course';
   xhr.open('GET', url, true);
   xhr.responseType = 'json';
-  xhr.setRequestHeader('X-Parse-Application-Id','cfjEGfMBX9PMvwb1ien9G5J6ttN6C3zDozBoL0Kp');
-  xhr.setRequestHeader('X-Parse-REST-API-Key','a7EWINL4OUZ4lEuA4t7X9iCwQ1wPl0fRliCGnQmU');
+  xhr.setRequestHeader('X-Parse-Application-Id','StLdNROxObnXnsMmMQy04IGTESb3knvycrHsuiXH');
+  xhr.setRequestHeader('X-Parse-REST-API-Key','ncucKuYWWez3FfbF1UPEehLqgnFkhyQZYzLfuCPv');
   xhr.onload = function () {
-    console.log(xhr.responseText);
+    // console.log(xhr.responseText);
     sendCourseList(xhr.responseText);
   };
   xhr.send();
