@@ -3,11 +3,13 @@
         "COMMAND": 0,
         "COURSE_ID": 6,
         "COURSE_NAME": 7,
+        "DESCRIPTION": 8,
         "HOLE_INDEX": 1,
         "LAT": 4,
         "LONG": 5,
         "PAR": 3,
-        "SI": 2
+        "SI": 2,
+        "WAYPOINT_INDEX": 9
     },
     "capabilities": [
         "location"

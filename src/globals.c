@@ -20,11 +20,18 @@ int8_t selected_course_index = -1;
 static bool round_in_progress = false;
 bool refresh_gps = false;
 
+typedef struct {
+  double latitude;
+  double longitude;
+  char description[30];
+} waypoint;
+
 struct holes {
   uint8_t par;
   uint8_t si;
-  double latitude;
-  double longitude;
+  waypoint waypoints[6];
+//  double latitude;
+//  double longitude;
   uint8_t my_strokes;
   uint8_t my_shots_received;
   int8_t my_net;
@@ -115,12 +122,16 @@ uint8_t get_my_strokes(uint8_t hole_index) {
   return hole[hole_index].my_strokes;
 };
 
-double get_latitude(uint8_t hole_index) {
-  return hole[hole_index].latitude;
+double get_latitude(uint8_t hole_index, uint8_t waypoint_index) {
+  return hole[hole_index].waypoints[waypoint_index].latitude;
 }
 
-double get_longitude(uint8_t hole_index) {
-  return hole[hole_index].longitude;
+double get_longitude(uint8_t hole_index, uint8_t waypoint_index) {
+  return hole[hole_index].waypoints[waypoint_index].longitude;
+}
+
+char* get_waypoint_description(uint8_t hole_index, uint8_t waypoint_index) {
+  return hole[hole_index].waypoints[waypoint_index].description;
 }
 
 void set_my_strokes(uint8_t hole_index, int8_t new_strokes) {
@@ -138,16 +149,20 @@ void set_my_strokes(uint8_t hole_index, int8_t new_strokes) {
   }
 };
 
-void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si, double latitude, double longitude) {
+void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si) {
   hole[hole_index].par = par;
   hole[hole_index].si = si;
-  hole[hole_index].latitude = latitude;
-  hole[hole_index].longitude = longitude;
   hole[hole_index].my_strokes = 0;
   hole[hole_index].my_net = 0;
   hole[hole_index].my_points = 0;
   hole[hole_index].my_shots_received = calculate_shots(si, get_handicap());
 };
+
+void setup_waypoints(uint8_t hole_index, uint8_t waypoint_index, double latitude, double longitude, char* description) {
+  hole[hole_index].waypoints[waypoint_index].latitude = latitude;
+  hole[hole_index].waypoints[waypoint_index].longitude = longitude;
+  snprintf(hole[hole_index].waypoints[waypoint_index].description, 30, "%s", description);
+}
 
 uint8_t calculate_shots(uint8_t si, uint8_t handicap) {
   uint8_t shots = 0;
@@ -231,8 +246,8 @@ void save_state(void) {
   for (int i = 0; i < 18; i++) {
     persist_write_int(PAR_KEY + i, hole[i].par);
     persist_write_int(SI_KEY + i, hole[i].si);
-    persist_write_int(LAT_KEY + i, (int)(hole[i].latitude * CONVERSION_FACTOR));
-    persist_write_int(LON_KEY + i, (int)(hole[i].longitude * CONVERSION_FACTOR));
+//    persist_write_int(LAT_KEY + i, (int)(hole[i].latitude * CONVERSION_FACTOR));
+//    persist_write_int(LON_KEY + i, (int)(hole[i].longitude * CONVERSION_FACTOR));
     /*
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Writing - hole %d, si %d, par %d, lat %d, long %d", 
               (int)i,
@@ -274,8 +289,8 @@ void restore_state(void) {
   for (int i = 0; i < 18; i++) {
     hole[i].par = persist_read_int(PAR_KEY + i);
     hole[i].si = persist_read_int(SI_KEY + i);
-    hole[i].latitude = (double)persist_read_int(LAT_KEY + i)/CONVERSION_FACTOR;
-    hole[i].longitude = (double)persist_read_int(LON_KEY + i)/CONVERSION_FACTOR;
+    //hole[i].latitude = (double)persist_read_int(LAT_KEY + i)/CONVERSION_FACTOR;
+    //hole[i].longitude = (double)persist_read_int(LON_KEY + i)/CONVERSION_FACTOR;
     /*
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Retrieved - hole %d, si %d, par %d, lat %d, long %d", 
               (int)i,

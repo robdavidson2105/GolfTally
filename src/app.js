@@ -49,6 +49,7 @@ var commands = {
   COMMAND_RECEIVE_COURSES : 4,
   COMMAND_RECEIVE_LOCATION : 5,
   COMMAND_RECEIVE_COURSE_DETAILS : 6,
+  COMMAND_RECEIVE_WAYPOINTS : 7,
 };
 
 var gpsID;
@@ -84,31 +85,32 @@ console.log('location error (' + err.code + '): ' + err.message);
 // Once we've got the course details from Parse, we parse the json response
 // then push them into an array and send to the Pebble
 function sendCourseDetails(data) {
-  var holes =[];
   var response = JSON.parse(data);
   var hole_details = response.Holes;
+
+  appMessageQueue.clear();
+  
+  // For each hole, send the par and stroke index
   for (var i = 0; i < 18; i++) {
-    holes.push({
+    appMessageQueue.add({
       COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
       HOLE_INDEX: parseInt(hole_details[i].HoleIndex),
       SI: parseInt(hole_details[i].StrokeIndex),
-      PAR: parseInt(hole_details[i].Par),
-      LAT: cleanCoordinate(parseFloat(hole_details[i].Lat)),
-      LONG: cleanCoordinate(parseFloat(hole_details[i].Long))
+      PAR: parseInt(hole_details[i].Par)
     });
-  }
-  //TODO: implement the appMessageQueue add instead of holes.push
-  //The two loops are left over from testing
-  appMessageQueue.clear();
-  for (var n = 0; n < 18; n++) {
-    appMessageQueue.add({
-      COMMAND: commands.COMMAND_RECEIVE_COURSE_DETAILS,
-      HOLE_INDEX: holes[n].HOLE_INDEX,
-      SI: holes[n].SI,
-      PAR: holes[n].PAR,
-      LAT: holes[n].LAT,
-      LONG: holes[n].LONG
-    });
+    // Each hole has waypoints so send them too
+    //console.log("Number of waypoints: " + hole_details[i].Waypoints.length);
+    for (var n = 0; n < hole_details[i].Waypoints.length; n++) {
+      appMessageQueue.add({
+        COMMAND: commands.COMMAND_RECEIVE_WAYPOINTS,
+        HOLE_INDEX: parseInt(hole_details[i].HoleIndex),
+        WAYPOINT_INDEX: n,
+        DESCRIPTION: hole_details[i].Waypoints[n].Description,
+        LAT: cleanCoordinate(parseFloat(hole_details[i].Waypoints[n].Lat)),
+        LONG: cleanCoordinate(parseFloat(hole_details[i].Waypoints[n].Lon))
+      });
+      //console.log("sent waypoint, holeindex:" + parseInt(hole_details[i].HoleIndex) + " , waypointindex:" + n + " ,description: " + hole_details[i].Waypoints[n].Description);
+    }
   }
   appMessageQueue.send();
 }
@@ -139,7 +141,7 @@ function getCourseDetails(courseID) {
   xhr.setRequestHeader('X-Parse-Application-Id','StLdNROxObnXnsMmMQy04IGTESb3knvycrHsuiXH');
   xhr.setRequestHeader('X-Parse-REST-API-Key','ncucKuYWWez3FfbF1UPEehLqgnFkhyQZYzLfuCPv');
   xhr.onload = function () {
-    // console.log(xhr.responseText);
+    console.log(xhr.responseText);
     sendCourseDetails(xhr.responseText);
   };
   xhr.send();

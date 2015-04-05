@@ -4,6 +4,9 @@
 
   
 static uint8_t current_hole_index;
+static uint8_t current_waypoint_index;
+static int last_lat;
+static int last_lon;
 static MenuLayer *callback_menu;
 //static AppTimer *timer_handle;
   
@@ -60,7 +63,7 @@ static void initialise_ui(void) {
   s_distance_to_target_title = text_layer_create(GRect(2, 41, 118, 24));
   text_layer_set_background_color(s_distance_to_target_title, GColorClear);
   text_layer_set_text_color(s_distance_to_target_title, GColorWhite);
-  text_layer_set_text(s_distance_to_target_title, "Distance to pin");
+  text_layer_set_text(s_distance_to_target_title, "Select target..");
   text_layer_set_text_alignment(s_distance_to_target_title, GTextAlignmentCenter);
   text_layer_set_font(s_distance_to_target_title, s_res_gothic_18);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_distance_to_target_title);
@@ -196,21 +199,47 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   // and we'll then receive updates from the phone
   
   // Avoid requesting multiple updates - things go wrong!
-  if (!refresh_gps) {      
-    refresh_gps = true;
-    request_gps();
-    text_layer_set_text(s_distance_to_target, "???");
-    layer_mark_dirty(window_get_root_layer(s_window));
+  current_waypoint_index++;
+  
+  // We can only have 6 waypoints so cycle back round
+  if (current_waypoint_index > 5) {
+    current_waypoint_index = 0;
   }
   
+  // If there's no description on the next waypoint then cycle back round
+  if (strlen(get_waypoint_description(current_hole_index, current_waypoint_index)) < 1) {
+    current_waypoint_index = 0;
+  }
+  
+  if (!refresh_gps) {
+    current_waypoint_index = 0;
+    refresh_gps = true;
+    request_gps();
+  }
+  static char title[30];
+  snprintf(title, sizeof(title), "%s", get_waypoint_description(current_hole_index, current_waypoint_index));
+  text_layer_set_text(s_distance_to_target_title, title);
+  text_layer_set_text(s_distance_to_target, "???");
+  layer_mark_dirty(window_get_root_layer(s_window));
+  // Update the distance display - but only if we've got a position saved
+  if (last_lat !=0 && last_lon !=0) {
+    update_distance(last_lat, last_lon);
+  }
 }
 
 // Once we've received current coords then calculate the distance in yards to the next target
 void update_distance(int latitude, int longitude) {
+  // Save the lat and lon - we'll use them to immediate calculate
+  // distances if the target changes
+  last_lat = latitude;
+  last_lon = longitude;
   //We receive lat and lon as integers - values must be divided by 1000000
   double lat = (double)latitude / CONVERSION_FACTOR;
   double lon = (double)longitude / CONVERSION_FACTOR;
-  int distance = calculate_distance(lat, lon, get_latitude(current_hole_index), get_longitude(current_hole_index));
+  int distance = calculate_distance(lat, lon, 
+                                    get_latitude(current_hole_index, current_waypoint_index), 
+                                    get_longitude(current_hole_index, current_waypoint_index)
+                                   );
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Coords received from phone: %d,%d", latitude, longitude);
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat of hole: %d", (int)(CONVERSION_FACTOR * get_latitude(current_hole_index)));
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "Long of hole: %d", (int)(CONVERSION_FACTOR * get_longitude(current_hole_index)));
@@ -270,6 +299,9 @@ void show_current_hole_details(uint8_t hole_index, void *callback_context) {
   //Save a reference to the menu which called us here
   callback_menu = callback_context;
   current_hole_index = hole_index;
+  current_waypoint_index = 0;
+  last_lat = 0;
+  last_lon = 0;
   window_set_window_handlers(s_window, (WindowHandlers) {
     .unload = handle_window_unload,
   });

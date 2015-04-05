@@ -7,6 +7,8 @@
 #define KEY_LONG 5
 #define KEY_COURSE_ID 6
 #define KEY_COURSE_NAME 7
+#define KEY_WAYPOINT_DESCRIPTION 8
+#define KEY_WAYPOINT_INDEX 9
 
 #define COMMAND_LIST_COURSES 0
 #define COMMAND_SELECT_COURSE 1
@@ -15,6 +17,7 @@
 #define COMMAND_RECEIVE_COURSES 4
 #define COMMAND_RECEIVE_LOCATION 5 
 #define COMMAND_RECEIVE_COURSE_DETAILS 6
+#define COMMAND_RECEIVE_WAYPOINTS 7
   
 #define CONVERSION_FACTOR 1000000
 
@@ -39,11 +42,14 @@ int8_t get_my_net(uint8_t hole_index);
 int8_t get_my_points(uint8_t hole_index);
 uint8_t get_my_strokes(uint8_t hole_index);
 uint8_t get_my_shots_received(uint8_t hole_index);
-double get_latitude(uint8_t hole_index);
-double get_longitude(uint8_t hole_index);
+double get_latitude(uint8_t hole_index, uint8_t waypoint_index);
+double get_longitude(uint8_t hole_index, uint8_t waypoint_index);
+char* get_waypoint_description(uint8_t hole_index, uint8_t waypoint_index);
 
 void set_my_strokes(uint8_t hole_index, int8_t new_strokes);
-void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si, double latitude, double longitude);
+void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si);
+void setup_waypoints(uint8_t hole_index, uint8_t waypoint_index, double latitude, double longitude, char* description);
+
 
 uint8_t calculate_shots(uint8_t si, uint8_t handicap);
 
