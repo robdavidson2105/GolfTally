@@ -100,7 +100,10 @@ function sendCourseDetails(data) {
     });
     // Each hole has waypoints so send them too
     //console.log("Number of waypoints: " + hole_details[i].Waypoints.length);
-    for (var n = 0; n < hole_details[i].Waypoints.length; n++) {
+    // only allow 6 waypoints
+    var numberOfWaypoints = hole_details[i].Waypoints.length;
+    if (numberOfWaypoints > 6) { numberOfWaypoints = 6;}
+    for (var n = 0; n < numberOfWaypoints; n++) {
       appMessageQueue.add({
         COMMAND: commands.COMMAND_RECEIVE_WAYPOINTS,
         HOLE_INDEX: parseInt(hole_details[i].HoleIndex),

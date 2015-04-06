@@ -95,6 +95,6 @@ static void init(void) {
 }
 
 static void deinit(void) {
-  save_state();
+  //save_state();
   hide_main_menu();
 }

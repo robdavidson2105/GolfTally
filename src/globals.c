@@ -6,10 +6,12 @@
 #define HANDICAP_KEY 1 
 #define COURSE_NAME_KEY 10
 #define COURSE_ID_KEY 11
+#define HOLE_KEY 100
 #define PAR_KEY 20
 #define SI_KEY 40
-#define LAT_KEY 60
-#define LON_KEY 80
+#define LAT_KEY 50
+#define LON_KEY 60
+#define WAYPOINT_DESCRIPTION_KEY 70
   
 // Gathered together a number of global functions here - there's probably an easier way to avoid
 // doing this - but hey, it works!
@@ -23,15 +25,13 @@ bool refresh_gps = false;
 typedef struct {
   double latitude;
   double longitude;
-  char description[30];
+  char description[20];
 } waypoint;
 
 struct holes {
   uint8_t par;
   uint8_t si;
-  waypoint waypoints[6];
-//  double latitude;
-//  double longitude;
+  waypoint waypoints[NUMBER_OF_WAYPOINTS];
   uint8_t my_strokes;
   uint8_t my_shots_received;
   int8_t my_net;
@@ -241,22 +241,35 @@ void save_state(void) {
     return;
   }
   persist_write_string(COURSE_NAME_KEY, course[course_index].course_name);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Written course_name: %s", course[course_index].course_name);
   persist_write_string(COURSE_ID_KEY, course[course_index].course_id);
   
+  // We'll use a byte array to store some of the data - using write_int was crashing watch
+  uint8_t pars_and_SI[36];
+  
   for (int i = 0; i < 18; i++) {
-    persist_write_int(PAR_KEY + i, hole[i].par);
-    persist_write_int(SI_KEY + i, hole[i].si);
-//    persist_write_int(LAT_KEY + i, (int)(hole[i].latitude * CONVERSION_FACTOR));
-//    persist_write_int(LON_KEY + i, (int)(hole[i].longitude * CONVERSION_FACTOR));
-    /*
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Writing - hole %d, si %d, par %d, lat %d, long %d", 
-              (int)i,
-              (int)hole[i].par,
-              (int)hole[i].si,
-              (int)(hole[i].latitude * CONVERSION_FACTOR),
-              (int)(hole[i].longitude * CONVERSION_FACTOR)
-             );
-             */
+    pars_and_SI[i * 2] = hole[i].par;
+    pars_and_SI[i * 2 + 1] = hole[i].si;
+    persist_write_data(HOLE_KEY, pars_and_SI, sizeof(pars_and_SI));
+    for (int n = 0; n < NUMBER_OF_WAYPOINTS; n++) {
+      int lat = (int)(hole[i].waypoints[n].latitude * CONVERSION_FACTOR);
+      int lon = (int)(hole[i].waypoints[n].longitude * CONVERSION_FACTOR);
+      
+      if (lat !=0  && lon !=0) {
+        persist_write_int(HOLE_KEY * i + (LAT_KEY + n), lat);
+        persist_write_int(HOLE_KEY * i + (LON_KEY + n), lon);
+        persist_write_string(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n, hole[i].waypoints[n].description);
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Writing waypoint: %s", hole[i].waypoints[n].description);
+      } else {
+        // Tidyup unwanted keys
+        if (persist_exists(HOLE_KEY * i + LAT_KEY + n)) {persist_delete(HOLE_KEY * i + LAT_KEY + n);}
+        if (persist_exists(HOLE_KEY * i + LON_KEY + n)) {persist_delete(HOLE_KEY * i + LON_KEY + n);}
+        if (persist_exists(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n)) {
+          persist_delete(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n);
+        }
+      }
+      
+    }
   }
   
 }
@@ -286,20 +299,34 @@ void restore_state(void) {
   persist_read_string(COURSE_ID_KEY, course_id, sizeof(course_id));
   add_course(course_id, course_name);
   selected_course_index = 0;
+  
+  // Read pars and SIs from byte array storage
+  uint8_t pars_and_SI[36];
+  persist_read_data(HOLE_KEY, pars_and_SI, sizeof(pars_and_SI));
+  
   for (int i = 0; i < 18; i++) {
-    hole[i].par = persist_read_int(PAR_KEY + i);
-    hole[i].si = persist_read_int(SI_KEY + i);
-    //hole[i].latitude = (double)persist_read_int(LAT_KEY + i)/CONVERSION_FACTOR;
-    //hole[i].longitude = (double)persist_read_int(LON_KEY + i)/CONVERSION_FACTOR;
-    /*
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Retrieved - hole %d, si %d, par %d, lat %d, long %d", 
+    hole[i].par = pars_and_SI[i * 2];
+    hole[i].si = pars_and_SI[i * 2 + 1];
+    for (int n = 0; n < 6; n++)
+      {
+      if (persist_exists(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n)) {
+        hole[i].waypoints[n].latitude = (double)persist_read_int(HOLE_KEY * i + LAT_KEY + n)/CONVERSION_FACTOR;
+        hole[i].waypoints[n].longitude = (double)persist_read_int(HOLE_KEY * i + LON_KEY + n)/CONVERSION_FACTOR;
+        persist_read_string(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n,
+                          hole[i].waypoints[n].description,
+                          sizeof(hole[i].waypoints[n].description)
+                         );
+/*      
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Retrieved - hole %d, si %d, par %d, lat %d, long %d, desc %s", 
               (int)i,
               (int)hole[i].par,
               (int)hole[i].si,
-              (int)(hole[i].latitude * CONVERSION_FACTOR),
-              (int)(hole[i].longitude * CONVERSION_FACTOR)
-             );
-             */
+              (int)(hole[i].waypoints[n].latitude * CONVERSION_FACTOR),
+              (int)(hole[i].waypoints[n].longitude * CONVERSION_FACTOR),
+              hole[i].waypoints[n].description
+             );  */
+      }
+    }
   }
   // Now calculate the shots received for the current handicap
   // just use the set_handicap function

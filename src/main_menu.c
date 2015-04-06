@@ -110,6 +110,7 @@ static void main_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index
       // Only start a game if we have already selected a course to play
       if (get_selected_course_index() != -1) {
         set_round_in_progress();
+        save_state();
         show_choose_hole();
         menu_layer_reload_data(s_main_menu);
         layer_mark_dirty(menu_layer_get_layer(s_main_menu));

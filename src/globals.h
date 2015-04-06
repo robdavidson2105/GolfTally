@@ -20,6 +20,7 @@
 #define COMMAND_RECEIVE_WAYPOINTS 7
   
 #define CONVERSION_FACTOR 1000000
+#define NUMBER_OF_WAYPOINTS 6
 
 void restore_state(void);
 void save_state(void);
