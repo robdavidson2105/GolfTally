@@ -235,6 +235,8 @@ int calculate_distance(double lat1, double long1, double lat2, double long2) {
 }
 
 void save_state(void) {
+  // SWITCH OFF SAVING/RESTORING STATE UNTIL FIXED IT
+  return;
   int8_t course_index = get_selected_course_index();
   if (course_index == -1) {
     // There's no courses selected so nothing to save so bail out
@@ -280,6 +282,8 @@ void restore_state(void) {
   if (persist_exists(HANDICAP_KEY)) {
     set_handicap(persist_read_int(HANDICAP_KEY));
   }
+  // SWITCH OFF SAVING/RESTORING STATE UNTIL FIXED IT
+  return;
   
   // Now lets see if we've got the details of a course cached in storage
   if (!persist_exists(COURSE_NAME_KEY)) {
