@@ -2,10 +2,11 @@
 #include "choose_course.h"
 #include "globals.h"
   
+
+MenuLayer *s_course_list;
   
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
-
 
 static void initialise_ui(void) {
   s_window = window_create();
