@@ -149,7 +149,7 @@ void hide_scorecard(void) {
 //Helper function to print the golf scorecase
 TextLayer* print_label(int x, int y, int w, int h, bool bold, bool invert, char* value ) {
   TextLayer* this_label = text_layer_create(GRect(x, y, w, h));
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"Printing label for: %s, memory used: %d", value, heap_bytes_used());
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"Printing label for: %s, memory used: %d", value, heap_bytes_free());
   if (!invert) {
     text_layer_set_background_color(this_label, GColorClear);
     text_layer_set_text_color(this_label, GColorWhite);
