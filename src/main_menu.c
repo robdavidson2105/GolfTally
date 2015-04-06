@@ -103,7 +103,7 @@ static void main_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index
       break;
     
     case MENU_ROW_CHOOSE_COURSE:
-      show_choose_course();
+      show_choose_course(callback_context);
       break;
     
     case MENU_ROW_START_GAME:

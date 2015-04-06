@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "globals.h"
 #include "current_hole_details.h"
+#include "scorecard.h"
 
   
 static uint8_t current_hole_index;
@@ -152,7 +153,7 @@ static void request_gps() {
   dict_write_tuplet(iter, &value);
   app_message_outbox_send();
   // The message received handler is in main.c - it'll call the following update_distance function
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "request gps called");
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "request gps called");
 }
 
 static void cancel_gps() {
@@ -161,19 +162,10 @@ static void cancel_gps() {
   Tuplet value = TupletInteger(KEY_COMMAND, COMMAND_CLEAR_LOCATION_UPDATES);
   dict_write_tuplet(iter, &value);
   app_message_outbox_send();
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "cancel gps called");
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "cancel gps called");
 }
 
 static void handle_window_unload(Window* window) {
-  /*
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Unloading window");
-    // leaving this window so disable gps updates
-  refresh_gps = false;
-  // and terminate gps updates if any are scheduled
-  if (timer_handle != NULL) {
-    app_timer_cancel(timer_handle);
-  }
-  */
   refresh_gps = false;
   cancel_gps();
   destroy_ui();
@@ -240,10 +232,10 @@ void update_distance(int latitude, int longitude) {
                                     get_latitude(current_hole_index, current_waypoint_index), 
                                     get_longitude(current_hole_index, current_waypoint_index)
                                    );
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Coords received from phone: %d,%d", latitude, longitude);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Coords received from phone: %d,%d", latitude, longitude);
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat of hole: %d", (int)(CONVERSION_FACTOR * get_latitude(current_hole_index)));
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "Long of hole: %d", (int)(CONVERSION_FACTOR * get_longitude(current_hole_index)));
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "New distance called: %d", distance);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "New distance called: %d", distance);
   
   // Display the yardage on-screen
   static char yardage[] = ">2000";
@@ -259,6 +251,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (current_hole_index == 17) {
     window_stack_pop(true);
     hide_current_hole_details();
+    show_scorecard();
     return;
   }
   //We need to make sure the selected index in the previous menulayer is
@@ -271,6 +264,10 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   hide_current_hole_details();
   //After closing the current hole - show the next hole details
   show_current_hole_details(current_hole_index + 1, callback_menu);
+}
+
+static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
+  show_scorecard();
 }
 
 //Click Handler for single click on down button - adds a shot
@@ -291,6 +288,7 @@ static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, add_shot);
   window_long_click_subscribe(BUTTON_ID_DOWN, 0, NULL, subtract_shot);
+  window_long_click_subscribe(BUTTON_ID_SELECT, 0, NULL, select_long_click_handler);
 }
 
 //Entry function for this window - called from choose_hole menu list

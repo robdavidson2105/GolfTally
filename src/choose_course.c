@@ -4,6 +4,7 @@
   
 
 MenuLayer *s_course_list;
+static MenuLayer *callback_menu;
   
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -55,7 +56,10 @@ static void course_list_select_click(struct MenuLayer* menu, MenuIndex* cell_ind
   dict_write_tuplet(iter, &command);
   dict_write_tuplet(iter, &value);
   app_message_outbox_send();
-  //Dismiss this winow and return to the main menu
+  //Dismiss this winow and return to the main menu and move the menu to Start Round
+  MenuIndex idx = menu_layer_get_selected_index(callback_menu);
+  idx.row = idx.row + 1;
+  menu_layer_set_selected_index(callback_menu, idx, MenuRowAlignCenter, false);
   window_stack_pop(true);
   hide_choose_course();
 }
@@ -68,7 +72,8 @@ static void course_list_draw_row(GContext* ctx, const Layer* cell_layer, MenuInd
   menu_cell_basic_draw(ctx, cell_layer, get_course(cell_index->row), NULL, NULL);
 }
 
-void show_choose_course(void) {
+void show_choose_course(void* callback_context) {
+  callback_menu = callback_context;
   initialise_ui();
   // If we haven't got any courses loaded then call the request_courses() function
   // if (get_count_of_courses() == 0) {
