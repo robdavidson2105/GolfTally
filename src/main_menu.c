@@ -130,7 +130,7 @@ static void main_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index
 void confirm_clear_scores_callback(bool result) {
   if (result) {
     for (int i = 0; i < 18; i++) {
-        set_my_strokes(0, 0);
+        set_my_strokes(i, 0);
       }
     clear_round_in_progress();
     // We need to reload the data in the MenuLayer
