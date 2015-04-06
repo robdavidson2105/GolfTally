@@ -36,6 +36,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
       Tuple* course_name = dict_find(iter, KEY_COURSE_NAME);
       add_course(course_id->value->cstring, course_name->value->cstring);
       menu_layer_reload_data(s_course_list);
+      layer_mark_dirty(menu_layer_get_layer(s_course_list));
       break;
     
     case COMMAND_RECEIVE_COURSE_DETAILS:;
