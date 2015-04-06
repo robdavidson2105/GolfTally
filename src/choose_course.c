@@ -44,6 +44,7 @@ static void request_courses(void) {
 // Function called when a course is selected from the menu
 static void course_list_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
   set_selected_course_index(cell_index->row);
+  clear_round_in_progress();
   // Send a request to the phone to get the details of the selected course
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
