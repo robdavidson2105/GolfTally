@@ -149,6 +149,7 @@ void hide_scorecard(void) {
 //Helper function to print the golf scorecase
 TextLayer* print_label(int x, int y, int w, int h, bool bold, bool invert, char* value ) {
   TextLayer* this_label = text_layer_create(GRect(x, y, w, h));
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"Printing label for: %s", value);
   if (!invert) {
     text_layer_set_background_color(this_label, GColorClear);
     text_layer_set_text_color(this_label, GColorWhite);
@@ -176,7 +177,6 @@ TextLayer* print_title(int x, int y, int w, int h, bool bold, char* value ) {
   } else {
     text_layer_set_font(this_label, s_res_gothic_24);
   }
-  //scroll_layer_add_child(s_scroll_layer, (Layer *)this_label);
   layer_add_child(window_get_root_layer(s_window), (Layer *)this_label);
   return this_label;
 }
