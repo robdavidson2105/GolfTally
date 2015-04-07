@@ -67,7 +67,7 @@ static void initialise_ui(void) {
   // Empty buf_score_area
   memset(buf_score_area, 0, sizeof(buf_score_area));
   for (uint8_t i=0; i < 18; i++) {
-    snprintf(buf, sizeof(buf), "%d       %d       %d\n", get_my_strokes(i), get_my_net(i), get_my_points(i));
+    snprintf(buf, sizeof(buf), "%d      %d      %d\n", get_my_strokes(i), get_my_net(i), get_my_points(i));
     strcat(buf_score_area,buf);
     // After 9 holes leave a gap for the "Out" score
     if (i == 8) {
@@ -75,7 +75,7 @@ static void initialise_ui(void) {
     }
   } 
  
-  score_area = text_layer_create(GRect(27, 0, 117, 600));
+  score_area = text_layer_create(GRect(25, 0, 117, 600));
   print_label(score_area,false,false,false, buf_score_area);
   
   //Calculate totals
