@@ -83,7 +83,7 @@ void clear_round_in_progress(void) {
   round_in_progress = false;
 }
 
-void set_handicap(uint8_t new_handicap) {
+uint8_t set_handicap(uint8_t new_handicap) {
   handicap = new_handicap;
   if (selected_course_index != -1) {
     for (uint8_t i=0; i <18; i++) {
@@ -93,6 +93,7 @@ void set_handicap(uint8_t new_handicap) {
       set_my_strokes(i, get_my_strokes(i));
     }
   }
+  return 0;
 }
 
 uint8_t get_handicap(void) {
@@ -161,7 +162,7 @@ void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si) {
 void setup_waypoints(uint8_t hole_index, uint8_t waypoint_index, double latitude, double longitude, char* description) {
   hole[hole_index].waypoints[waypoint_index].latitude = latitude;
   hole[hole_index].waypoints[waypoint_index].longitude = longitude;
-  snprintf(hole[hole_index].waypoints[waypoint_index].description, 30, "%s", description);
+  snprintf(hole[hole_index].waypoints[waypoint_index].description, 20, "%s", description);
 }
 
 uint8_t calculate_shots(uint8_t si, uint8_t handicap) {
@@ -236,6 +237,7 @@ int calculate_distance(double lat1, double long1, double lat2, double long2) {
 
 void save_state(void) {
   // SWITCH OFF SAVING/RESTORING STATE UNTIL FIXED IT
+  /*
   return;
   int8_t course_index = get_selected_course_index();
   if (course_index == -1) {
@@ -249,11 +251,11 @@ void save_state(void) {
   // We'll use a byte array to store some of the data - using write_int was crashing watch
   uint8_t pars_and_SI[36];
   
-  for (int i = 0; i < 18; i++) {
+  for (uint8_t i = 0; i < 18; i++) {
     pars_and_SI[i * 2] = hole[i].par;
     pars_and_SI[i * 2 + 1] = hole[i].si;
     persist_write_data(HOLE_KEY, pars_and_SI, sizeof(pars_and_SI));
-    for (int n = 0; n < NUMBER_OF_WAYPOINTS; n++) {
+    for (uint8_t n = 0; n < NUMBER_OF_WAYPOINTS; n++) {
       int lat = (int)(hole[i].waypoints[n].latitude * CONVERSION_FACTOR);
       int lon = (int)(hole[i].waypoints[n].longitude * CONVERSION_FACTOR);
       
@@ -273,7 +275,7 @@ void save_state(void) {
       
     }
   }
-  
+  */
 }
 
 void restore_state(void) {
@@ -283,6 +285,7 @@ void restore_state(void) {
     set_handicap(persist_read_int(HANDICAP_KEY));
   }
   // SWITCH OFF SAVING/RESTORING STATE UNTIL FIXED IT
+  /*
   return;
   
   // Now lets see if we've got the details of a course cached in storage
@@ -296,7 +299,7 @@ void restore_state(void) {
   }
   
   // So at this point we must have a course cached - so lets load all the details
-  bool no_errors = true;  // .... but lets watch out for any errors in loading
+  
   char course_id[11];
   char course_name[20];
   persist_read_string(COURSE_NAME_KEY, course_name, sizeof(course_name));
@@ -308,10 +311,10 @@ void restore_state(void) {
   uint8_t pars_and_SI[36];
   persist_read_data(HOLE_KEY, pars_and_SI, sizeof(pars_and_SI));
   
-  for (int i = 0; i < 18; i++) {
+  for (uint8_t i = 0; i < 18; i++) {
     hole[i].par = pars_and_SI[i * 2];
     hole[i].si = pars_and_SI[i * 2 + 1];
-    for (int n = 0; n < 6; n++)
+    for (uint8_t n = 0; n < 6; n++)
       {
       if (persist_exists(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n)) {
         hole[i].waypoints[n].latitude = (double)persist_read_int(HOLE_KEY * i + LAT_KEY + n)/CONVERSION_FACTOR;
@@ -320,7 +323,7 @@ void restore_state(void) {
                           hole[i].waypoints[n].description,
                           sizeof(hole[i].waypoints[n].description)
                          );
-/*      
+      
         APP_LOG(APP_LOG_LEVEL_DEBUG, "Retrieved - hole %d, si %d, par %d, lat %d, long %d, desc %s", 
               (int)i,
               (int)hole[i].par,
@@ -328,11 +331,12 @@ void restore_state(void) {
               (int)(hole[i].waypoints[n].latitude * CONVERSION_FACTOR),
               (int)(hole[i].waypoints[n].longitude * CONVERSION_FACTOR),
               hole[i].waypoints[n].description
-             );  */
+             );  
       }
     }
   }
   // Now calculate the shots received for the current handicap
   // just use the set_handicap function
+*/
   set_handicap(get_handicap());
 }

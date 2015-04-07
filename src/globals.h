@@ -24,7 +24,7 @@
 
 void restore_state(void);
 void save_state(void);
-void set_handicap(uint8_t new_handicap);
+uint8_t set_handicap(uint8_t new_handicap);
 uint8_t get_handicap(void);
 uint8_t get_count_of_courses(void);
 void add_course(char* course_id, char* course_name);

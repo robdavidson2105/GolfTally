@@ -14,70 +14,56 @@ static void deinit(void);
 // sending a GPS location, sending a list of courses, or sending the details for a course
 static void in_received_handler(DictionaryIterator *iter, void *context) 
 {
+  
   Tuple* command = dict_find(iter, KEY_COMMAND);
-  // APP_LOG(APP_LOG_LEVEL_DEBUG, "Msg received from phone: %d", (int)command->value->int32);
-  switch(command->value->int32) {
-    case COMMAND_RECEIVE_LOCATION:;
+  if (command->value->int32 == COMMAND_RECEIVE_LOCATION) {
       //The dictionary should contain lat, long of our gps position
       Tuple* longitude = dict_find(iter, KEY_LONG);
       Tuple* latitude = dict_find(iter, KEY_LAT);
+      
       //This function is in current_hole_details and should update the distance to current target
-      // APP_LOG(APP_LOG_LEVEL_DEBUG, "Coords received from phone - updating distance...");
+      
       // Just check that refresh_gps is still true - this is a callback, so the value
       // could've changed in the meantime
       if (refresh_gps) {
         update_distance((int)latitude->value->int32, (int)longitude->value->int32);
       }
-      break;
-    
-    case COMMAND_RECEIVE_COURSES:;
+  }
+  
+  if (command->value->int32 == COMMAND_RECEIVE_COURSES) { 
       //The dictionary should contain a single course id and course name
       Tuple* course_id = dict_find(iter, KEY_COURSE_ID);
       Tuple* course_name = dict_find(iter, KEY_COURSE_NAME);
       add_course(course_id->value->cstring, course_name->value->cstring);
       menu_layer_reload_data(s_course_list);
       layer_mark_dirty(menu_layer_get_layer(s_course_list));
-      break;
-    
-    case COMMAND_RECEIVE_COURSE_DETAILS:;
+  }
+  
+  if (command->value->int32 == COMMAND_RECEIVE_COURSE_DETAILS) {     
       Tuple* hole_index = dict_find(iter, KEY_HOLE_INDEX);
       Tuple* hole_si = dict_find(iter, KEY_SI);
       Tuple* hole_par = dict_find(iter, KEY_PAR);
-    
-/*      APP_LOG(APP_LOG_LEVEL_DEBUG, "Msg received - hole %d, si %d, par %d, lat %d, long %d", 
-              (int)hole_index->value->int32,
-              (int)hole_si->value->int32,
-              (int)hole_par->value->int32,
-              (int)lat->value->int32,
-              (int)lon->value->int32
-             );  */
-             
+              
       setup_holes((uint8_t)hole_index->value->int32,
                   (uint8_t)hole_par->value->int32,
                   (uint8_t)hole_si->value->int32
                   );
-      break;
+   }
     
-    case COMMAND_RECEIVE_WAYPOINTS:;
+   if (command->value->int32 == COMMAND_RECEIVE_WAYPOINTS) {
       Tuple* this_hole_index = dict_find(iter, KEY_HOLE_INDEX);
       Tuple* waypoint_index = dict_find(iter, KEY_WAYPOINT_INDEX);
       Tuple* waypoint_description = dict_find(iter, KEY_WAYPOINT_DESCRIPTION);
       Tuple* lon = dict_find(iter, KEY_LONG);
       Tuple* lat = dict_find(iter, KEY_LAT);
-    /*
-      APP_LOG(APP_LOG_LEVEL_DEBUG, "Waypoint Msg received - hole %d, waypoint %d,  lat %d, long %d, desc %s", 
-              (int)this_hole_index->value->int32,
-              (int)waypoint_index->value->int32,
-              (int)lat->value->int32,
-              (int)lon->value->int32,
-              waypoint_description->value->cstring
-             );  */
+    
       setup_waypoints((uint8_t)this_hole_index->value->int32,
                       (uint8_t)waypoint_index->value->int32,
                      (double)lat->value->int32/CONVERSION_FACTOR,
                       (double)lon->value->int32/CONVERSION_FACTOR,
                       waypoint_description->value->cstring);
-  }
+   }
+
 }
 
 // Here's the main entry point for the app
