@@ -218,12 +218,14 @@ float my_sqrt(const float x)
 // the cosine function is an approximation, and the square root function isn't exact either .....
 // put it all together and its as accurate as my golf shots 
 int calculate_distance(int32_t lat1, int32_t long1, int32_t lat2, int32_t long2) {
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "lat1, long1 = %d, %d", lat1, long1);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "lat2, long2 = %d, %d", lat2, long2);
   double d_lat1 = PI * (double)lat1 / 180.0 / CONVERSION_FACTOR;
   double d_lat2 = PI * (double)lat2 / 180.0 / CONVERSION_FACTOR;
   double d_long1 = PI * (double)long1 / 180.0 / CONVERSION_FACTOR;
   double d_long2 = PI * (double)long2 / 180.0 / CONVERSION_FACTOR;
   double x = d_long2 - d_long1;
-  x = x * cosine((lat1 + lat2)/2.0);
+  x = x * cosine((d_lat1 + d_lat2)/2.0);
   double y = d_lat2 - d_lat1;
   double distance = x * x + y * y ;
   distance = 6967325 * my_sqrt(distance);
