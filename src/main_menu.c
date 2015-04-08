@@ -57,7 +57,40 @@ static uint16_t main_menu_get_num_rows(struct MenuLayer* menu, uint16_t section_
 
 /// Draw the menu rows
 static void main_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* callback_context) {
+  if (cell_index->row == MENU_ROW_SET_HANDICAP) {
+    // Choose the handicap
+      static char subtitle[] = "My handicap: 18";
+      snprintf(subtitle, sizeof(subtitle), "My handicap: %d", get_handicap());
+      menu_cell_basic_draw(ctx, cell_layer, "Set Handicap", subtitle, NULL);
+  } else if (cell_index->row == MENU_ROW_CHOOSE_COURSE) {
+    // Choose the course
+      if (selected_course_index == -1) {
+        menu_cell_basic_draw(ctx, cell_layer, "Choose Course", "None selected", NULL);  
+      } else {
+        menu_cell_basic_draw(ctx, cell_layer, "Choose Course", get_course(selected_course_index), NULL);
+      } 
+  } else if (cell_index->row == MENU_ROW_START_GAME) {
+    // Start the game
+      //If there's a round in progress then text should say continue
+      if (is_round_in_progress) {
+        menu_cell_basic_draw(ctx, cell_layer, "Continue round", NULL, NULL);
+      } else {
+        if (selected_course_index != -1) {
+          menu_cell_basic_draw(ctx, cell_layer, "Start round", NULL, NULL);
+        } 
+      }
+  } else if (cell_index->row == MENU_ROW_CLEAR_ROUND) {
+    // Clear all the scores
+      //If there's no round in progress then don't draw the clear scores row
+      if (is_round_in_progress) {
+        menu_cell_basic_draw(ctx, cell_layer, "Clear scores", NULL, NULL);
+      }
+  }
+}
   
+  
+  
+  /*
   switch (cell_index->row) {
     // Choose the handicap
     // had to put a ; at the end of the next line - otherwise the compiler didn't like it
@@ -92,38 +125,28 @@ static void main_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex
         menu_cell_basic_draw(ctx, cell_layer, "Clear scores", NULL, NULL);
       }
       break;
-  }
-}
+  }  */
 
 // Click handler for the menu
 static void main_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
-  switch (cell_index->row) {
-    case MENU_ROW_SET_HANDICAP:
+  if (cell_index->row == MENU_ROW_SET_HANDICAP) {
       show_choose_handicap();
-      break;
-    
-    case MENU_ROW_CHOOSE_COURSE:
+  } else if (cell_index->row == MENU_ROW_CHOOSE_COURSE) {
       show_choose_course(callback_context);
-      break;
-    
-    case MENU_ROW_START_GAME:
+  } else if (cell_index->row == MENU_ROW_START_GAME) {
       // Only start a game if we have already selected a course to play
       if (selected_course_index != -1) {
         is_round_in_progress = true;
-        save_state();
         show_choose_hole();
         menu_layer_reload_data(s_main_menu);
         layer_mark_dirty(menu_layer_get_layer(s_main_menu));
       }
-      break;
-    
-    case MENU_ROW_CLEAR_ROUND: ;
+  } else if (cell_index->row == MENU_ROW_CLEAR_ROUND) {
       void (*ptr_confirm_or_cancel_callback)(bool);
       //show the confirm or cancel dialog box and send a pointer to
       //the callback function
       ptr_confirm_or_cancel_callback = confirm_clear_scores_callback;
       show_confirm_or_cancel(ptr_confirm_or_cancel_callback);
-    break;
   }
 }
 

@@ -31,12 +31,11 @@ static void handle_window_unload(Window* window) {
 
 // Function called when a course is selected from the menu
 static void course_list_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
-  //set_selected_course_index(cell_index->row);
   selected_course_index = cell_index->row;
   is_round_in_progress = false;
   // Send a request to the phone to get the details of the selected course
   send_message_to_phone(COMMAND_SELECT_COURSE, selected_course_index);
-  // Need to send the course ID !!
+
   //Dismiss this winow and return to the main menu and move the menu to Start Round
   MenuIndex idx = menu_layer_get_selected_index(callback_menu);
   idx.row = idx.row + 1;

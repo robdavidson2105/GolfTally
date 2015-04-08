@@ -207,17 +207,11 @@ void update_distance(int32_t latitude, int32_t longitude) {
   last_lat = latitude;
   last_lon = longitude;
   //We receive lat and lon as integers - values must be divided by 1000000
-  //double lat = (double)latitude / CONVERSION_FACTOR;
-  //double lon = (double)longitude / CONVERSION_FACTOR;
-  int distance = calculate_distance(latitude, longitude, 
+  uint16_t distance = calculate_distance(latitude, longitude, 
                                     get_latitude(current_hole_index, current_waypoint_index), 
                                     get_longitude(current_hole_index, current_waypoint_index)
                                    );
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Coords received from phone: %d,%d", latitude, longitude);
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Lat of hole: %d", (int)(CONVERSION_FACTOR * get_latitude(current_hole_index)));
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Long of hole: %d", (int)(CONVERSION_FACTOR * get_longitude(current_hole_index)));
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "New distance called: %d", distance);
-  
+
   // Display the yardage on-screen
   static char yardage[] = ">2000";
   if (distance < 2000) {

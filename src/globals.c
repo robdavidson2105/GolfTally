@@ -4,6 +4,7 @@
 #define PI 3.14159265  
 
 #define HANDICAP_KEY 1 
+/*  
 #define COURSE_NAME_KEY 10
 #define COURSE_ID_KEY 11
 #define HOLE_KEY 100
@@ -11,13 +12,13 @@
 #define SI_KEY 40
 #define LAT_KEY 50
 #define LON_KEY 60
-#define WAYPOINT_DESCRIPTION_KEY 70
+#define WAYPOINT_DESCRIPTION_KEY 70  */
   
 // Gathered together a number of global functions here - there's probably an easier way to avoid
 // doing this - but hey, it works!
   
 static uint8_t handicap;
-uint8_t count_of_courses = 0;
+static uint8_t count_of_courses = 0;
 int8_t selected_course_index = -1;
 bool is_round_in_progress = false;
 bool refresh_gps = false;
@@ -217,62 +218,15 @@ float my_sqrt(const float x)
 // calculate distances between two points on surface of sphere - the calculation is an approximation,
 // the cosine function is an approximation, and the square root function isn't exact either .....
 // put it all together and its as accurate as my golf shots 
-int calculate_distance(int32_t lat1, int32_t long1, int32_t lat2, int32_t long2) {
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "lat1, long1 = %d, %d", lat1, long1);
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "lat2, long2 = %d, %d", lat2, long2);
+uint16_t calculate_distance(int32_t lat1, int32_t long1, int32_t lat2, int32_t long2) {
   double d_lat1 = PI * (double)lat1 / 180.0 / CONVERSION_FACTOR;
   double d_lat2 = PI * (double)lat2 / 180.0 / CONVERSION_FACTOR;
-  double d_long1 = PI * (double)long1 / 180.0 / CONVERSION_FACTOR;
-  double d_long2 = PI * (double)long2 / 180.0 / CONVERSION_FACTOR;
-  double x = d_long2 - d_long1;
+  double x = ((double)long2 - (double)long1) * PI / 180.0 / CONVERSION_FACTOR ;
   x = x * cosine((d_lat1 + d_lat2)/2.0);
   double y = d_lat2 - d_lat1;
-  double distance = x * x + y * y ;
-  distance = 6967325 * my_sqrt(distance);
-  return (int)(distance);
-}
-
-void save_state(void) {
-  // SWITCH OFF SAVING/RESTORING STATE UNTIL FIXED IT
-  /*
-  return;
-  int8_t course_index = get_selected_course_index();
-  if (course_index == -1) {
-    // There's no courses selected so nothing to save so bail out
-    return;
-  }
-  persist_write_string(COURSE_NAME_KEY, course[course_index].course_name);
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Written course_name: %s", course[course_index].course_name);
-  persist_write_string(COURSE_ID_KEY, course[course_index].course_id);
-  
-  // We'll use a byte array to store some of the data - using write_int was crashing watch
-  uint8_t pars_and_SI[36];
-  
-  for (uint8_t i = 0; i < 18; i++) {
-    pars_and_SI[i * 2] = hole[i].par;
-    pars_and_SI[i * 2 + 1] = hole[i].si;
-    persist_write_data(HOLE_KEY, pars_and_SI, sizeof(pars_and_SI));
-    for (uint8_t n = 0; n < NUMBER_OF_WAYPOINTS; n++) {
-      int lat = (int)(hole[i].waypoints[n].latitude * CONVERSION_FACTOR);
-      int lon = (int)(hole[i].waypoints[n].longitude * CONVERSION_FACTOR);
-      
-      if (lat !=0  && lon !=0) {
-        persist_write_int(HOLE_KEY * i + (LAT_KEY + n), lat);
-        persist_write_int(HOLE_KEY * i + (LON_KEY + n), lon);
-        persist_write_string(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n, hole[i].waypoints[n].description);
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Writing waypoint: %s", hole[i].waypoints[n].description);
-      } else {
-        // Tidyup unwanted keys
-        if (persist_exists(HOLE_KEY * i + LAT_KEY + n)) {persist_delete(HOLE_KEY * i + LAT_KEY + n);}
-        if (persist_exists(HOLE_KEY * i + LON_KEY + n)) {persist_delete(HOLE_KEY * i + LON_KEY + n);}
-        if (persist_exists(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n)) {
-          persist_delete(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n);
-        }
-      }
-      
-    }
-  }
-  */
+  uint16_t distance = 6967325 * my_sqrt(x * x + y * y);
+  //distance = 6967325 * my_sqrt(distance);
+  return (distance);
 }
 
 void restore_state(void) {
@@ -281,59 +235,5 @@ void restore_state(void) {
   if (persist_exists(HANDICAP_KEY)) {
     set_handicap(persist_read_int(HANDICAP_KEY));
   }
-  // SWITCH OFF SAVING/RESTORING STATE UNTIL FIXED IT
-  /*
-  return;
-  
-  // Now lets see if we've got the details of a course cached in storage
-  if (!persist_exists(COURSE_NAME_KEY)) {
-    // bail out of function if no courses found
-    return;
-  }
-  if (!persist_exists(COURSE_ID_KEY)) {
-    // bail out of function if not course id found
-    return;
-  }
-  
-  // So at this point we must have a course cached - so lets load all the details
-  
-  char course_id[11];
-  char course_name[20];
-  persist_read_string(COURSE_NAME_KEY, course_name, sizeof(course_name));
-  persist_read_string(COURSE_ID_KEY, course_id, sizeof(course_id));
-  add_course(course_id, course_name);
-  selected_course_index = 0;
-  
-  // Read pars and SIs from byte array storage
-  uint8_t pars_and_SI[36];
-  persist_read_data(HOLE_KEY, pars_and_SI, sizeof(pars_and_SI));
-  
-  for (uint8_t i = 0; i < 18; i++) {
-    hole[i].par = pars_and_SI[i * 2];
-    hole[i].si = pars_and_SI[i * 2 + 1];
-    for (uint8_t n = 0; n < 6; n++)
-      {
-      if (persist_exists(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n)) {
-        hole[i].waypoints[n].latitude = (double)persist_read_int(HOLE_KEY * i + LAT_KEY + n)/CONVERSION_FACTOR;
-        hole[i].waypoints[n].longitude = (double)persist_read_int(HOLE_KEY * i + LON_KEY + n)/CONVERSION_FACTOR;
-        persist_read_string(HOLE_KEY * i + WAYPOINT_DESCRIPTION_KEY + n,
-                          hole[i].waypoints[n].description,
-                          sizeof(hole[i].waypoints[n].description)
-                         );
-      
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Retrieved - hole %d, si %d, par %d, lat %d, long %d, desc %s", 
-              (int)i,
-              (int)hole[i].par,
-              (int)hole[i].si,
-              (int)(hole[i].waypoints[n].latitude * CONVERSION_FACTOR),
-              (int)(hole[i].waypoints[n].longitude * CONVERSION_FACTOR),
-              hole[i].waypoints[n].description
-             );  
-      }
-    }
-  }
-  // Now calculate the shots received for the current handicap
-  // just use the set_handicap function
-*/
   set_handicap(get_handicap());
 }

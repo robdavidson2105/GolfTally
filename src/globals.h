@@ -23,7 +23,6 @@
 #define NUMBER_OF_WAYPOINTS 6
 
 void restore_state(void);
-void save_state(void);
 uint8_t set_handicap(uint8_t new_handicap);
 uint8_t get_handicap(void);
 uint8_t get_count_of_courses(void);
@@ -60,6 +59,6 @@ void setup_waypoints(uint8_t hole_index, uint8_t waypoint_index, int32_t latitud
 uint8_t calculate_shots(uint8_t si, uint8_t handicap);
 
 double cosine(double x);
-int calculate_distance(int32_t lat1, int32_t long1, int32_t lat2, int32_t long2);
+uint16_t calculate_distance(int32_t lat1, int32_t long1, int32_t lat2, int32_t long2);
 
 

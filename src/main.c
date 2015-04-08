@@ -70,7 +70,6 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 int main(void) {
   init();
   app_message_register_inbox_received(in_received_handler);
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Max inbox size %d", (int)app_message_outbox_size_maximum());
   app_message_open(128, 32);
   app_event_loop();
   deinit();
@@ -83,6 +82,5 @@ static void init(void) {
 }
 
 static void deinit(void) {
-  //save_state();
   hide_main_menu();
 }

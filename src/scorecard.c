@@ -47,9 +47,6 @@ static void initialise_ui(void) {
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   
   // Get the window size and create a scroll layer on it
-  //Layer *window_layer = window_get_root_layer(s_window);
-  //GRect bounds = layer_get_frame(window_layer);
-  //bounds.origin.y = bounds.origin.y + 28;
   s_scroll_layer = scroll_layer_create(GRect(0, 28, 144, 140));
   
   // Set the default click handlers for scrolling
@@ -68,17 +65,18 @@ static void initialise_ui(void) {
   // Empty buf_score_area
   memset(buf_score_area, 0, sizeof(buf_score_area));
   for (uint8_t i=0; i < 18; i++) {
-    //snprintf(buf, sizeof(buf), "%d       %d       %d\n", get_my_strokes(i), get_my_net(i), get_my_points(i));
     if (get_my_strokes(i) < 10) {strcat(buf_score_area,"  ");}
     snprintf(buf, sizeof(buf), "%d", get_my_strokes(i));
     strcat(buf_score_area,buf);
     strcat(buf_score_area,"     ");
+    
     if (get_my_net(i) < 10) {strcat(buf_score_area,"  ");}
     snprintf(buf, sizeof(buf), "%d", get_my_net(i));
     strcat(buf_score_area,buf);
     strcat(buf_score_area,"       ");
     snprintf(buf, sizeof(buf), "%d\n", get_my_points(i));
     strcat(buf_score_area,buf);
+    
     // After 9 holes leave a gap for the "Out" score
     if (i == 8) {
       strcat(buf_score_area, "\n\n");
@@ -176,7 +174,6 @@ void show_scorecard(void) {
     .unload = handle_window_unload,
   });
   window_stack_push(s_window, true);
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Free mem %d", (int)heap_bytes_free());
 }
 
 void hide_scorecard(void) {
@@ -187,7 +184,6 @@ void hide_scorecard(void) {
 //Helper function to print the golf scorecase
 void print_label(TextLayer* this_label, bool bold, bool invert, bool is_title, char* value, GTextAlignment alignment ) {
 
-  //APP_LOG(APP_LOG_LEVEL_DEBUG,"Printing scorecard - memory free: %d", heap_bytes_free());
   if (!invert) {
     text_layer_set_background_color(this_label, GColorClear);
     text_layer_set_text_color(this_label, GColorWhite);

@@ -42,30 +42,22 @@ static void handle_window_unload(Window* window) {
 // Drawn the rows for cancelling or confirmation - draw the cancel
 // row first - good practise for cancel to be default response
 static void confirm_or_cancel_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* callback_context) {
-  switch (cell_index->row) {
-    case MENU_ROW_CANCEL:
+  if (cell_index->row == MENU_ROW_CANCEL) {
       menu_cell_basic_draw(ctx, cell_layer, "Cancel", NULL, NULL);
-      break;
-    case MENU_ROW_CONFIRM:
+  } else if (cell_index->row == MENU_ROW_CONFIRM) {
       menu_cell_basic_draw(ctx, cell_layer, "Confirm", NULL, NULL);
-      break;
   }
 }
 
 // Click handler for the window - we send a true or false back through the callback function to
 // notify the response to the caller
 static void confirm_or_cancel_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
-  switch (cell_index->row) {
-    case MENU_ROW_CANCEL:
-      window_stack_pop(true);
-      hide_confirm_or_cancel();
-      callback_function(false);
-      break;
-    case MENU_ROW_CONFIRM:
-      window_stack_pop(true);
-      hide_confirm_or_cancel();
+  window_stack_pop(true);
+  hide_confirm_or_cancel();
+  if (cell_index->row == MENU_ROW_CONFIRM) {
       callback_function(true);
-      break;
+  } else { 
+    callback_function(false);
   }
 }
 static void confirm_or_cancel_draw_header(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
