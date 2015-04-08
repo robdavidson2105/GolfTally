@@ -26,6 +26,7 @@
             },
             {
                 "file": "images/club.png",
+                "menuIcon": true,
                 "name": "ICON_ACTIONBAR_CLUB",
                 "type": "png"
             },
