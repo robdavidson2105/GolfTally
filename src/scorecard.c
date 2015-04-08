@@ -5,11 +5,11 @@
 
 // Originally used the UI editor and created each label separately
 // ..... it took too much space in RAM so had to re-write using arrays
-void print_label(TextLayer* this_label, bool bold, bool invert, bool is_title, char* value );
+void print_label(TextLayer* this_label, bool bold, bool invert, bool is_title, char* value, GTextAlignment alignment );
 //TextLayer* print_title(int x, int y, int w, int h, bool bold, char* value );
 //static char label[48];
 
-static char buf_score_area[256];
+static char buf_score_area[512];
 static char buf_s_out_gr[] = "50";
 static char buf_s_out_nt[] = "50";
 static char buf_s_out_pt[] = "50";
@@ -58,16 +58,27 @@ static void initialise_ui(void) {
   scroll_layer_set_content_size(s_scroll_layer, GSize(144, 600));
   
   score_labels = text_layer_create(GRect(0, 0, 30, 600));
-  print_label(score_labels,true,false,false, "1\n2\n3\n4\n5\n6\n7\n8\n9\n\n\n10\n11\n12\n13\n14\n15\n16\n17\n18");
+  print_label(score_labels,true,false,false, 
+              "1\n2\n3\n4\n5\n6\n7\n8\n9\n\n\n10\n11\n12\n13\n14\n15\n16\n17\n18",
+             GTextAlignmentCenter);
   
-  s_labels = text_layer_create(GRect(25, 0, 119, 40)); 
-  print_label(s_labels, true, false, true,"Gross  Net  Pts"); //Column labels
+  s_labels = text_layer_create(GRect(22, 0, 119, 40)); 
+  print_label(s_labels, true, false, true,"Gross  Net   Pts", GTextAlignmentLeft); //Column labels
 
-  char buf[21];
+  char buf[25];
   // Empty buf_score_area
   memset(buf_score_area, 0, sizeof(buf_score_area));
   for (uint8_t i=0; i < 18; i++) {
-    snprintf(buf, sizeof(buf), "%d     %d     %d\n", get_my_strokes(i), get_my_net(i), get_my_points(i));
+    //snprintf(buf, sizeof(buf), "%d       %d       %d\n", get_my_strokes(i), get_my_net(i), get_my_points(i));
+    if (get_my_strokes(i) < 10) {strcat(buf_score_area,"  ");}
+    snprintf(buf, sizeof(buf), "%d", get_my_strokes(i));
+    strcat(buf_score_area,buf);
+    strcat(buf_score_area,"     ");
+    if (get_my_net(i) < 10) {strcat(buf_score_area,"  ");}
+    snprintf(buf, sizeof(buf), "%d", get_my_net(i));
+    strcat(buf_score_area,buf);
+    strcat(buf_score_area,"       ");
+    snprintf(buf, sizeof(buf), "%d\n", get_my_points(i));
     strcat(buf_score_area,buf);
     // After 9 holes leave a gap for the "Out" score
     if (i == 8) {
@@ -75,8 +86,8 @@ static void initialise_ui(void) {
     }
   } 
  
-  score_area = text_layer_create(GRect(25, 0, 117, 600));
-  print_label(score_area,false,false,false, buf_score_area);
+  score_area = text_layer_create(GRect(34, 0, 110, 600));
+  print_label(score_area,false,false,false, buf_score_area, GTextAlignmentLeft);
   
   //Calculate totals
   int8_t gross_out = 0;
@@ -107,27 +118,29 @@ static void initialise_ui(void) {
   snprintf(buf_s_tot_nt, sizeof(buf_s_tot_nt), "%d", net_out+net_in);
   snprintf(buf_s_tot_pt, sizeof(buf_s_tot_pt), "%d", points_out+points_in);
   
-  s_out_gr = text_layer_create(GRect(27, 225, 40, 30)); 
-  print_label(s_out_gr, true, false, false, buf_s_out_gr); //Placeholder for front 9 gross scores
-  s_in_gr = text_layer_create(GRect(27, 476, 40, 30)); 
-  print_label(s_in_gr, true, false, false, buf_s_in_gr); //Placeholder back 9 gross score
+  s_out_gr = text_layer_create(GRect(25, 225, 40, 30)); 
+  print_label(s_out_gr, true, false, false, buf_s_out_gr, GTextAlignmentCenter); //Placeholder for front 9 gross scores
+  s_in_gr = text_layer_create(GRect(25, 484, 40, 30)); 
+  print_label(s_in_gr, true, false, false, buf_s_in_gr, GTextAlignmentCenter); //Placeholder for front 9 gross scores
+
   
-  s_out_nt = text_layer_create(GRect(67, 225, 40, 30)); 
-  print_label(s_out_nt, true, false, false, buf_s_out_nt); //Placeholder for front 9 net score 
-  s_in_nt = text_layer_create(GRect(67, 476, 40, 30)); 
-  print_label(s_in_nt, true, false, false, buf_s_in_nt); //Placeholder for back 9 net score
+  s_out_nt = text_layer_create(GRect(64, 225, 40, 30)); 
+  print_label(s_out_nt, true, false, false, buf_s_out_nt, GTextAlignmentCenter); //Placeholder for front 9 gross scores
+  s_in_nt = text_layer_create(GRect(64, 484, 40, 30)); 
+  print_label(s_in_nt, true, false, false, buf_s_in_nt, GTextAlignmentCenter); //Placeholder for front 9 gross scores
+
   
-  s_out_pt = text_layer_create(GRect(107, 225, 40, 28)); 
-  print_label(s_out_pt, true, false, false, buf_s_out_pt); //Placeholder for front 9 points
-  s_in_pt = text_layer_create(GRect(107, 476, 40, 28)); 
-  print_label(s_in_pt, true, false, false, buf_s_in_pt); //Placeholder for back 9 points
+  s_out_pt = text_layer_create(GRect(101, 225, 40, 28)); 
+  print_label(s_out_pt, true, false, false, buf_s_out_pt, GTextAlignmentCenter); //Placeholder for front 9 gross scores
+  s_in_pt = text_layer_create(GRect(101, 484, 40, 28)); 
+  print_label(s_in_pt, true, false, false, buf_s_in_pt, GTextAlignmentCenter); //Placeholder for front 9 gross scores
   
-  s_tot_gr = text_layer_create(GRect(27, 506, 38, 30)); 
-  print_label(s_tot_gr, true, true, false, buf_s_tot_gr); //Placeholder for round gross total
-  s_tot_nt = text_layer_create(GRect(67, 506, 38, 30)); 
-  print_label(s_tot_nt, true, true, false, buf_s_tot_nt); //Placeholder for round net total
-  s_tot_pt = text_layer_create(GRect(107, 506, 38, 30)); 
-  print_label(s_tot_pt, true, true, false, buf_s_tot_pt); //Placeholder for round points total
+  s_tot_gr = text_layer_create(GRect(23, 519, 38, 30)); 
+  print_label(s_tot_gr, true, true, false, buf_s_tot_gr, GTextAlignmentCenter); //Placeholder for round gross total
+  s_tot_nt = text_layer_create(GRect(63, 519, 38, 30)); 
+  print_label(s_tot_nt, true, true, false, buf_s_tot_nt, GTextAlignmentCenter); //Placeholder for round net total
+  s_tot_pt = text_layer_create(GRect(103, 519, 35, 30)); 
+  print_label(s_tot_pt, true, true, false, buf_s_tot_pt, GTextAlignmentCenter); //Placeholder for round points total
   
   layer_add_child(window_get_root_layer(s_window), scroll_layer_get_layer(s_scroll_layer));
   
@@ -164,6 +177,7 @@ void show_scorecard(void) {
     .unload = handle_window_unload,
   });
   window_stack_push(s_window, true);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Free mem %d", (int)heap_bytes_free());
 }
 
 void hide_scorecard(void) {
@@ -172,15 +186,16 @@ void hide_scorecard(void) {
 
 
 //Helper function to print the golf scorecase
-void print_label(TextLayer* this_label, bool bold, bool invert, bool is_title, char* value ) {
+void print_label(TextLayer* this_label, bool bold, bool invert, bool is_title, char* value, GTextAlignment alignment ) {
 
   //APP_LOG(APP_LOG_LEVEL_DEBUG,"Printing scorecard - memory free: %d", heap_bytes_free());
   if (!invert) {
     text_layer_set_background_color(this_label, GColorClear);
     text_layer_set_text_color(this_label, GColorWhite);
   }
+
   text_layer_set_text(this_label, value);
-  text_layer_set_text_alignment(this_label, GTextAlignmentCenter);
+  text_layer_set_text_alignment(this_label, alignment);
   if (bold) {
     text_layer_set_font(this_label, s_res_gothic_24_bold);
   } else {
