@@ -35,13 +35,13 @@ static uint16_t holes_menu_get_num_rows(struct MenuLayer* menu, uint16_t section
 // Function to draw the row for a specific hole
 static void holes_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* callback_context) {
 
-  char title[] = "18 / Par 3 / SI 18";
+  char title[19];
   snprintf(title, sizeof(title), 
            "%d / Par %d / SI %d", 
            (cell_index->row)+1, 
            get_par(cell_index->row), 
            get_si(cell_index->row));
-  char subtitle[] = "10/Net 10/Pts 5";
+  char subtitle[16];
   snprintf(subtitle, sizeof(subtitle), 
            "%d/Net %d/Pts %d", 
            get_my_strokes(cell_index->row), 

@@ -19,12 +19,12 @@
 static uint8_t handicap;
 uint8_t count_of_courses = 0;
 int8_t selected_course_index = -1;
-static bool round_in_progress = false;
+bool is_round_in_progress = false;
 bool refresh_gps = false;
 
 typedef struct {
-  double latitude;
-  double longitude;
+  int32_t latitude;
+  int32_t longitude;
   char description[20];
 } waypoint;
 
@@ -65,22 +65,17 @@ void reset_course_count(void) {
 uint8_t get_count_of_courses(void) {
   return count_of_courses;
 }
-int8_t get_selected_course_index() {
-  return selected_course_index;
-}
 
-void set_selected_course_index(int8_t course_index) {
-  selected_course_index = course_index;
-}
-
-bool is_round_in_progress(void) {
-  return round_in_progress;
-}
-void set_round_in_progress(void) {
-  round_in_progress = true;
-}
-void clear_round_in_progress(void) {
-  round_in_progress = false;
+void send_message_to_phone(uint8_t command, int8_t course_index) {
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  Tuplet value = TupletInteger(KEY_COMMAND, command);
+  dict_write_tuplet(iter, &value);
+  if (course_index != -1) {
+    Tuplet value = TupletCString(KEY_COURSE_ID, get_course_id(course_index));
+    dict_write_tuplet(iter, &value);
+  }
+  app_message_outbox_send();
 }
 
 uint8_t set_handicap(uint8_t new_handicap) {
@@ -123,11 +118,11 @@ uint8_t get_my_strokes(uint8_t hole_index) {
   return hole[hole_index].my_strokes;
 };
 
-double get_latitude(uint8_t hole_index, uint8_t waypoint_index) {
+int32_t get_latitude(uint8_t hole_index, uint8_t waypoint_index) {
   return hole[hole_index].waypoints[waypoint_index].latitude;
 }
 
-double get_longitude(uint8_t hole_index, uint8_t waypoint_index) {
+int32_t get_longitude(uint8_t hole_index, uint8_t waypoint_index) {
   return hole[hole_index].waypoints[waypoint_index].longitude;
 }
 
@@ -159,7 +154,7 @@ void setup_holes(uint8_t hole_index, uint8_t par, uint8_t si) {
   hole[hole_index].my_shots_received = calculate_shots(si, get_handicap());
 };
 
-void setup_waypoints(uint8_t hole_index, uint8_t waypoint_index, double latitude, double longitude, char* description) {
+void setup_waypoints(uint8_t hole_index, uint8_t waypoint_index, int32_t latitude, int32_t longitude, char* description) {
   hole[hole_index].waypoints[waypoint_index].latitude = latitude;
   hole[hole_index].waypoints[waypoint_index].longitude = longitude;
   snprintf(hole[hole_index].waypoints[waypoint_index].description, 20, "%s", description);
@@ -222,14 +217,14 @@ float my_sqrt(const float x)
 // calculate distances between two points on surface of sphere - the calculation is an approximation,
 // the cosine function is an approximation, and the square root function isn't exact either .....
 // put it all together and its as accurate as my golf shots 
-int calculate_distance(double lat1, double long1, double lat2, double long2) {
-  lat1 = PI * lat1 / 180.0;
-  lat2 = PI * lat2 / 180.0;
-  long1 = PI * long1 / 180.0;
-  long2 = PI * long2 / 180.0;
-  double x = long2 - long1;
+int calculate_distance(int32_t lat1, int32_t long1, int32_t lat2, int32_t long2) {
+  double d_lat1 = PI * (double)lat1 / 180.0 / CONVERSION_FACTOR;
+  double d_lat2 = PI * (double)lat2 / 180.0 / CONVERSION_FACTOR;
+  double d_long1 = PI * (double)long1 / 180.0 / CONVERSION_FACTOR;
+  double d_long2 = PI * (double)long2 / 180.0 / CONVERSION_FACTOR;
+  double x = d_long2 - d_long1;
   x = x * cosine((lat1 + lat2)/2.0);
-  double y = lat2 - lat1;
+  double y = d_lat2 - d_lat1;
   double distance = x * x + y * y ;
   distance = 6967325 * my_sqrt(distance);
   return (int)(distance);

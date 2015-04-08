@@ -6,19 +6,18 @@
 // Originally used the UI editor and created each label separately
 // ..... it took too much space in RAM so had to re-write using arrays
 void print_label(TextLayer* this_label, bool bold, bool invert, bool is_title, char* value, GTextAlignment alignment );
-//TextLayer* print_title(int x, int y, int w, int h, bool bold, char* value );
-//static char label[48];
+
 
 static char buf_score_area[512];
-static char buf_s_out_gr[] = "50";
-static char buf_s_out_nt[] = "50";
-static char buf_s_out_pt[] = "50";
-static char buf_s_in_gr[] = "50";
-static char buf_s_in_nt[] = "50";
-static char buf_s_in_pt[] = "50";
-static char buf_s_tot_gr[] = "100";
-static char buf_s_tot_nt[] = "100";
-static char buf_s_tot_pt[] = "50";
+static char buf_s_out_gr[3];
+static char buf_s_out_nt[3];
+static char buf_s_out_pt[3];
+static char buf_s_in_gr[3];
+static char buf_s_in_nt[3];
+static char buf_s_in_pt[3];
+static char buf_s_tot_gr[4];
+static char buf_s_tot_nt[4];
+static char buf_s_tot_pt[4];
 
 static Window *s_window;
 static ScrollLayer *s_scroll_layer;
@@ -177,7 +176,7 @@ void show_scorecard(void) {
     .unload = handle_window_unload,
   });
   window_stack_push(s_window, true);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Free mem %d", (int)heap_bytes_free());
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Free mem %d", (int)heap_bytes_free());
 }
 
 void hide_scorecard(void) {

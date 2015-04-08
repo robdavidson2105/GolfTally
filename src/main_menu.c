@@ -41,11 +41,11 @@ static void handle_window_unload(Window* window) {
 // Number of rows in the main menu - it changes once we've selected a course - or we've
 // started a round
 static uint16_t main_menu_get_num_rows(struct MenuLayer* menu, uint16_t section_index, void* callback_context) {
-  if (is_round_in_progress()) {
+  if (is_round_in_progress) {
     // If there's a round in progress then we must need all the rows
     return 4;
   } else {
-    if (get_selected_course_index() == -1) {
+    if (selected_course_index == -1) {
     // If there's no course selected then don't draw the Start Round row
       return 2;
     } else {
@@ -68,19 +68,19 @@ static void main_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex
       break;
     // Choose the course
     case MENU_ROW_CHOOSE_COURSE:
-      if (get_selected_course_index() == -1) {
+      if (selected_course_index == -1) {
         menu_cell_basic_draw(ctx, cell_layer, "Choose Course", "None selected", NULL);  
       } else {
-        menu_cell_basic_draw(ctx, cell_layer, "Choose Course", get_course(get_selected_course_index()), NULL);
+        menu_cell_basic_draw(ctx, cell_layer, "Choose Course", get_course(selected_course_index), NULL);
       } 
       break;
     // Start the game
     case MENU_ROW_START_GAME:
       //If there's a round in progress then text should say continue
-      if (is_round_in_progress()) {
+      if (is_round_in_progress) {
         menu_cell_basic_draw(ctx, cell_layer, "Continue round", NULL, NULL);
       } else {
-        if (get_selected_course_index() != -1) {
+        if (selected_course_index != -1) {
           menu_cell_basic_draw(ctx, cell_layer, "Start round", NULL, NULL);
         } 
       }
@@ -88,7 +88,7 @@ static void main_menu_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex
     // Clear all the scores
     case MENU_ROW_CLEAR_ROUND:
       //If there's no round in progress then don't draw the clear scores row
-      if (is_round_in_progress()) {
+      if (is_round_in_progress) {
         menu_cell_basic_draw(ctx, cell_layer, "Clear scores", NULL, NULL);
       }
       break;
@@ -108,8 +108,8 @@ static void main_menu_select_click(struct MenuLayer* menu, MenuIndex* cell_index
     
     case MENU_ROW_START_GAME:
       // Only start a game if we have already selected a course to play
-      if (get_selected_course_index() != -1) {
-        set_round_in_progress();
+      if (selected_course_index != -1) {
+        is_round_in_progress = true;
         save_state();
         show_choose_hole();
         menu_layer_reload_data(s_main_menu);
@@ -132,7 +132,7 @@ void confirm_clear_scores_callback(bool result) {
     for (uint8_t i = 0; i < 18; i++) {
         set_my_strokes(i, 0);
       }
-    clear_round_in_progress();
+    is_round_in_progress = false;
     // We need to reload the data in the MenuLayer
     menu_layer_reload_data(s_main_menu);
     // The MenuLayer needs to redraw otherwise it doesn't scroll correctly

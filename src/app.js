@@ -160,7 +160,7 @@ function getCourseList() {
   xhr.setRequestHeader('X-Parse-Application-Id','StLdNROxObnXnsMmMQy04IGTESb3knvycrHsuiXH');
   xhr.setRequestHeader('X-Parse-REST-API-Key','ncucKuYWWez3FfbF1UPEehLqgnFkhyQZYzLfuCPv');
   xhr.onload = function () {
-    // console.log(xhr.responseText);
+    //console.log(xhr.responseText);
     sendCourseList(xhr.responseText);
   };
   xhr.send();

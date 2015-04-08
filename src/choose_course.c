@@ -29,33 +29,14 @@ static void handle_window_unload(Window* window) {
   destroy_ui();
 }
 
-// This function is called from show_choose_course() - but is only called if there's no courses already
-// loaded
-// TODO: allow a reload of courses, eg, following long-click
-static void request_courses(void) {
-  // Send a request to the phone to get the list of courses
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-  Tuplet value = TupletInteger(KEY_COMMAND, COMMAND_LIST_COURSES);
-  dict_write_tuplet(iter, &value);
-  app_message_outbox_send();
-  // The message received handler is in main.c - it'll add the courses
-  // one-by-one and call the menu redraw function after each course
-}
-
 // Function called when a course is selected from the menu
 static void course_list_select_click(struct MenuLayer* menu, MenuIndex* cell_index, void* callback_context) {
-  set_selected_course_index(cell_index->row);
-  clear_round_in_progress();
+  //set_selected_course_index(cell_index->row);
+  selected_course_index = cell_index->row;
+  is_round_in_progress = false;
   // Send a request to the phone to get the details of the selected course
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-  Tuplet command = TupletInteger(KEY_COMMAND, COMMAND_SELECT_COURSE);
-  // The course id is the ObjectID of the Parse record
-  Tuplet value = TupletCString(KEY_COURSE_ID, get_course_id(cell_index->row));
-  dict_write_tuplet(iter, &command);
-  dict_write_tuplet(iter, &value);
-  app_message_outbox_send();
+  send_message_to_phone(COMMAND_SELECT_COURSE, selected_course_index);
+  // Need to send the course ID !!
   //Dismiss this winow and return to the main menu and move the menu to Start Round
   MenuIndex idx = menu_layer_get_selected_index(callback_menu);
   idx.row = idx.row + 1;
@@ -77,9 +58,9 @@ void show_choose_course(void* callback_context) {
   initialise_ui();
   // If we haven't got any courses loaded then call the request_courses() function
   // if (get_count_of_courses() == 0) {
-  reset_course_count();  
-  request_courses();
-
+  reset_course_count();
+  send_message_to_phone(COMMAND_LIST_COURSES, -1);
+  
   menu_layer_set_callbacks(s_course_list, s_course_list, (MenuLayerCallbacks){
     .draw_row = course_list_draw_row,
     .get_num_rows = course_list_get_num_rows,

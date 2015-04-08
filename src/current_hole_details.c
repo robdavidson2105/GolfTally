@@ -6,8 +6,8 @@
   
 static uint8_t current_hole_index;
 static uint8_t current_waypoint_index;
-static int last_lat;
-static int last_lon;
+static int32_t last_lat;
+static int32_t last_lon;
 static MenuLayer *callback_menu;
 //static AppTimer *timer_handle;
   
@@ -146,36 +146,17 @@ static void destroy_ui(void) {
 }
 // END AUTO-GENERATED UI CODE
 
-static void request_gps() {
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-  Tuplet value = TupletInteger(KEY_COMMAND, COMMAND_GET_LOCATION);
-  dict_write_tuplet(iter, &value);
-  app_message_outbox_send();
-  // The message received handler is in main.c - it'll call the following update_distance function
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "request gps called");
-}
-
-static void cancel_gps() {
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-  Tuplet value = TupletInteger(KEY_COMMAND, COMMAND_CLEAR_LOCATION_UPDATES);
-  dict_write_tuplet(iter, &value);
-  app_message_outbox_send();
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "cancel gps called");
-}
-
 static void handle_window_unload(Window* window) {
   refresh_gps = false;
-  cancel_gps();
+  send_message_to_phone(COMMAND_CLEAR_LOCATION_UPDATES, -1);
   destroy_ui();
 }
 
 //Function to update the display with the latest score
 void display_shots(void) {
-  static char shots[] = "10";
-  static char net[] = "10";
-  static char points[] = "10";
+  static char shots[3];
+  static char net[3];
+  static char points[3];
   snprintf(shots, sizeof(shots), "%d", get_my_strokes(current_hole_index));
   text_layer_set_text(s_shots, shots);
   snprintf(net, sizeof(net), "%d", get_my_net(current_hole_index));
@@ -206,7 +187,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (!refresh_gps) {
     current_waypoint_index = 0;
     refresh_gps = true;
-    request_gps();
+    send_message_to_phone(COMMAND_GET_LOCATION, -1);
   }
   static char title[30];
   snprintf(title, sizeof(title), "%s", get_waypoint_description(current_hole_index, current_waypoint_index));
@@ -220,15 +201,15 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 // Once we've received current coords then calculate the distance in yards to the next target
-void update_distance(int latitude, int longitude) {
+void update_distance(int32_t latitude, int32_t longitude) {
   // Save the lat and lon - we'll use them to immediate calculate
   // distances if the target changes
   last_lat = latitude;
   last_lon = longitude;
   //We receive lat and lon as integers - values must be divided by 1000000
-  double lat = (double)latitude / CONVERSION_FACTOR;
-  double lon = (double)longitude / CONVERSION_FACTOR;
-  int distance = calculate_distance(lat, lon, 
+  //double lat = (double)latitude / CONVERSION_FACTOR;
+  //double lon = (double)longitude / CONVERSION_FACTOR;
+  int distance = calculate_distance(latitude, longitude, 
                                     get_latitude(current_hole_index, current_waypoint_index), 
                                     get_longitude(current_hole_index, current_waypoint_index)
                                    );
@@ -306,11 +287,11 @@ void show_current_hole_details(uint8_t hole_index, void *callback_context) {
   window_set_click_config_provider(s_window, click_config_provider);
   
   //Setup the initial values for the hole
-  static char hole_number[] = "18 - Par 3";
+  static char hole_number[11];
   snprintf(hole_number, sizeof(hole_number), "%d - Par %d", hole_index+1, get_par(hole_index));
   text_layer_set_text(s_hole_title, hole_number);
   
-  static char hole_subtitle[] = "SI 18 - 2 shots";
+  static char hole_subtitle[16];
   snprintf(hole_subtitle, sizeof(hole_subtitle), "SI %d - %d shots", get_si(hole_index), get_my_shots_received(hole_index));
   text_layer_set_text(s_hole_subtitle, hole_subtitle);
   

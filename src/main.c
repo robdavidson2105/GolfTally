@@ -26,7 +26,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
       // Just check that refresh_gps is still true - this is a callback, so the value
       // could've changed in the meantime
       if (refresh_gps) {
-        update_distance((int)latitude->value->int32, (int)longitude->value->int32);
+        update_distance((int32_t)latitude->value->int32, (int32_t)longitude->value->int32);
       }
   }
   
@@ -59,8 +59,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
     
       setup_waypoints((uint8_t)this_hole_index->value->int32,
                       (uint8_t)waypoint_index->value->int32,
-                     (double)lat->value->int32/CONVERSION_FACTOR,
-                      (double)lon->value->int32/CONVERSION_FACTOR,
+                      lat->value->int32,
+                      lon->value->int32,
                       waypoint_description->value->cstring);
    }
 
@@ -70,7 +70,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 int main(void) {
   init();
   app_message_register_inbox_received(in_received_handler);
-  app_message_open(64, 64);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Max inbox size %d", (int)app_message_outbox_size_maximum());
+  app_message_open(128, 32);
   app_event_loop();
   deinit();
 }
